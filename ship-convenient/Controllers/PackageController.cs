@@ -77,7 +77,7 @@ namespace ship_convenient.Controllers
             try
             {
                 /*ApiResponsePaginated<ResponseComboPackageModel> response = await _packageService.SuggestCombo(deliverId, pageIndex, pageSize);*/
-                ApiResponse<List<ResponseComboPackageModel>> response = await _packageService.SuggestComboV3(deliverId);
+                ApiResponse<List<ResponseComboPackageModel>> response = await _packageService.SuggestCombo(deliverId);
                 return SendResponse(response);
             }
             catch (HttpRequestException ex)
