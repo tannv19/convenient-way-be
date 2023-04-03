@@ -41,5 +41,16 @@ namespace unitofwork_core.Model.PackageModel
         public ResponseAccountModel? Deliver { get; set; }
         public List<ResponseProductModel> Products { get; set; } = new List<ResponseProductModel>();
         public List<ResponseTransactionPackageModel> PackageTransactions { get; set; } = new List<ResponseTransactionPackageModel>();
+
+
+        public int GetPriceProducts()
+        {
+            int price = 0;
+            foreach (var product in Products)
+            {
+                price += product.Price;
+            }
+            return price;
+        }
     }
 }

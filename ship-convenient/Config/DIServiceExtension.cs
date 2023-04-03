@@ -45,7 +45,8 @@ namespace ship_convenient.Config
             services.AddTransient<IDashboardService, DashboardService>();
             services.AddTransient<ISendSMSService, SendSmsService>();
             services.AddScoped<PackageUtils>();
-            services.AddScoped<AccountUtils>();
+            services.AddScoped<AccountUtils>();  
+            services.AddScoped<PackageSuggestService>();
         }
     }
 }

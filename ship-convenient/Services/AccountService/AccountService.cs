@@ -7,6 +7,7 @@ using ship_convenient.Core.IRepository;
 using ship_convenient.Core.Repository;
 using ship_convenient.Core.UnitOfWork;
 using ship_convenient.Entities;
+using ship_convenient.Helper.SuggestPackageHelper;
 using ship_convenient.Model.UserModel;
 using ship_convenient.Services.GenericService;
 using System.Linq.Expressions;
@@ -238,6 +239,18 @@ namespace ship_convenient.Services.AccountService
             return response;
         }
 
-       
+        public async Task<ApiResponse<List<DistancePackageModel>>> GetOrderPointVirtual(Guid accountId)
+        {
+            ApiResponse<List<DistancePackageModel>> response = new();
+            List<DistancePackageModel> result = await _accountUtils.GetCurrentVirtualPoint(accountId);
+            if (result.Count > 0) {
+                response.ToSuccessResponse(result, "Lấy thông tin thành công");
+            }
+            else
+            {
+                response.ToFailedResponse("Không tìm thấy lộ trình ảo");
+            }
+            return response;
+        }
     }
 }

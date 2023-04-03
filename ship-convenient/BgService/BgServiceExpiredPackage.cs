@@ -33,7 +33,7 @@ namespace ship_convenient.BgService
                     IPackageService _packageService = scope.ServiceProvider.GetRequiredService<IPackageService>();
                     IFirebaseCloudMsgService _fcmService = scope.ServiceProvider.GetRequiredService<IFirebaseCloudMsgService>();
                     await ExpriredPackagesProcess(_fcmService, _unitOfWork, _packageService);
-                    await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);
+                    await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                 }
 
             }

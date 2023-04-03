@@ -10,6 +10,8 @@ using System.Linq.Expressions;
 using unitofwork_core.Constant.Package;
 using Transaction = ship_convenient.Entities.Transaction;
 using RouteEntity = ship_convenient.Entities.Route;
+using ship_convenient.Helper.SuggestPackageHelper;
+using Route = ship_convenient.Entities.Route;
 
 namespace ship_convenient.Services.AccountService
 {
@@ -21,40 +23,6 @@ namespace ship_convenient.Services.AccountService
             _transactionRepo = unitOfWork.Transactions;
         }
 
-       /* public async Task<int> AvailableBalanceAsync(Guid accountId)
-        {
-            if (await IsNewAccountAsync(accountId))
-            {
-                int balanceDefault = _configRepo.GetDefaultBalanceNewAccount();
-                return balanceDefault;
-            };
-            List<string> validStatus = new() {
-                PackageStatus.SELECTED, PackageStatus.PICKUP_SUCCESS
-            };
-            List<Package> packages = await _packageRepo.GetAllAsync(
-                include: source => source.Include(p => p.Products),
-                predicate: p => validStatus.Contains(p.Status) && p.DeliverId == accountId);
-            int totalBalanceNotAvaiable = 0;
-            foreach (var item in packages)
-            {
-                totalBalanceNotAvaiable += item.Products.Sum(pro => pro.Price);
-            }
-
-            List<string> validStatusSender = new() {
-                PackageStatus.APPROVED, PackageStatus.SELECTED, PackageStatus.PICKUP_SUCCESS,
-            };
-            List<Package> packagesSender = await _packageRepo.GetAllAsync(
-                predicate: p => validStatus.Contains(p.Status) && p.SenderId == accountId);
-            int totalBalanceNotAvailabelSenderRole = 0;
-            foreach (var item in packagesSender)
-            {
-                totalBalanceNotAvaiable += item.PriceShip;
-            }
-            Account? account = await _accountRepo.GetByIdAsync(accountId);
-            if (account == null) throw new ArgumentException("Tài khoản không tồn tại");
-            return account.Balance - totalBalanceNotAvaiable - totalBalanceNotAvailabelSenderRole;
-        }
-*/
         public async Task<int> AvailableBalanceAsync(Guid accountId)
         {
             if (await IsNewAccountAsync(accountId))
@@ -149,49 +117,6 @@ namespace ship_convenient.Services.AccountService
             return route;
         }
 
-
-
-
-
-        /*public async Task<ResponseBalanceModel> AvailableBalanceModel(Guid accountId)
-        {
-            ResponseBalanceModel result = new();
-            if (await IsNewAccountAsync(accountId))
-            {
-                int balanceDefault = _configRepo.GetDefaultBalanceNewAccount();
-                result.IsNewAccount = true;
-                result.Balance = balanceDefault;
-                return result;
-            };
-            List<string> validStatus = new() {
-                 PackageStatus.SELECTED, PackageStatus.PICKUP_SUCCESS
-            };
-            List<Package> packages = await _packageRepo.GetAllAsync(
-                include: source => source.Include(p => p.Products),
-                predicate: p => validStatus.Contains(p.Status) && p.DeliverId == accountId);
-            int totalBalanceNotAvaiable = 0;
-            foreach (var item in packages)
-            {
-                totalBalanceNotAvaiable += item.Products.Sum(pro => pro.Price);
-            }
-
-            List<string> validStatusSender = new() {
-                PackageStatus.APPROVED, PackageStatus.SELECTED, PackageStatus.PICKUP_SUCCESS,
-            };
-            List<Package> packagesSender = await _packageRepo.GetAllAsync(
-                predicate: p => validStatus.Contains(p.Status) && p.SenderId == accountId);
-            int totalBalanceNotAvailabelSenderRole = 0;
-            foreach (var item in packagesSender)
-            {
-                totalBalanceNotAvaiable += item.PriceShip;
-            }
-            Account? account = await _accountRepo.GetByIdAsync(accountId);
-            if (account == null) throw new ArgumentException("Tài khoản không tồn tại");
-            result.Balance = account.Balance - totalBalanceNotAvaiable - totalBalanceNotAvailabelSenderRole;
-            return result;
-        }
-*/
-
         public async Task<bool> IsNewAccountAsync(Guid accountId)
         {
             bool result = false;
@@ -277,6 +202,18 @@ namespace ship_convenient.Services.AccountService
             Account? adminBalance = await _accountRepo.FirstOrDefaultAsync(predicateAdminBalance, disableTracking: false);
             if (adminBalance == null) throw new ArgumentException("Không tìm thấy tài khoản quản lý tiền");
             return adminBalance;
+        }
+
+        public async Task<List<DistancePackageModel>> GetCurrentVirtualPoint(Guid deliverId) {
+            List<DistancePackageModel> result;
+            Account? deliver = await _accountRepo.GetByIdAsync(deliverId, include: source => source.Include(ac => ac.InfoUser));
+            Route activeRoute = await GetActiveRoute(deliverId);
+            string suggestDirection = _configUserRepo.GetDirectionSuggest(deliver.InfoUser.Id); 
+            List<Package> packages = await _packageRepo.GetAllAsync(
+                predicate: p => p.DeliverId == deliverId && (p.Status == PackageStatus.SELECTED || p.Status == PackageStatus.PICKUP_SUCCESS),
+                include: source => source.Include(p => p.Products));
+            result = SuggestPackageHelper.GetListPointOrderName(direction: suggestDirection, packages: packages, route: activeRoute);
+            return result;
         }
 
     }

@@ -4,6 +4,7 @@ using ship_convenient.Constants.ConfigConstant;
 using ship_convenient.Core.UnitOfWork;
 using ship_convenient.Entities;
 using ship_convenient.Helper;
+using ship_convenient.Helper.SuggestPackageHelper;
 using ship_convenient.Model.FirebaseNotificationModel;
 using ship_convenient.Model.MapboxModel;
 using ship_convenient.Services.AccountService;
@@ -125,10 +126,47 @@ namespace ship_convenient.Services.PackageService
             return routePoints;
         }
 
+        public async Task ReloadVirtualRoute(Guid deliverId) {
+            RouteEntity activeRoute = await _accountUtils.GetActiveRoute(deliverId);
+            await RemoveRouteVirtual(activeRoute.Id);
+            await CreateRouteVirtual(deliverId);
+            await _unitOfWork.CompleteAsync();
+        }
+
         public async Task RemoveRouteVirtual(Guid routeId) {
             
-            List<RoutePoint> routePoints = await _routePointRepo.GetAllAsync(predicate: routePoint => routePoint.RouteId == routeId && routePoint.IsVitual == true);
+            List<RoutePoint> routePoints = await _routePointRepo.GetAllAsync(predicate: routePoint => routePoint.RouteId == routeId && routePoint.IsVitual == true, disableTracking: true);
             _routePointRepo.DeleteRange(routePoints);
+            
+        }
+        
+        public async Task CreateRouteVirtual(Guid deliverId) {
+            List<string> statusNotComplete = new List<string>
+            {
+                PackageStatus.SELECTED, PackageStatus.PICKUP_SUCCESS
+            };
+            List<Package> packagesNotComplete = await _packageRepo.GetAllAsync(predicate: package => package.DeliverId == deliverId && statusNotComplete.Contains(package.Status));
+            
+            List<GeoCoordinate> orderPoints = new List<GeoCoordinate>();
+
+            Account? deliver = await _accountRepo.FirstOrDefaultAsync(predicate: account => account.Id == deliverId, include: source => source.Include(ac => ac.InfoUser));
+            string directionSuggest = _configUserRepo.GetDirectionSuggest(deliver!.InfoUser!.Id);
+            RouteEntity activeRoute = await _accountUtils.GetActiveRoute(deliverId);
+            List<GeoCoordinate> geoCoordinates = SuggestPackageHelper.GetListPointOrder(directionSuggest, packagesNotComplete, activeRoute);
+            if (geoCoordinates.Count <= 2) return;
+          /*  if (packagesNotComplete.Count == 1)
+            {
+                geoCoordinates = MapHelper.GetListPointOrder(directionSuggest, packagesNotComplete[0], activeRoute);
+            }
+            else if (packagesNotComplete.Count == 2)
+            {
+                geoCoordinates = MapHelper.GetListPointOrderSecond(directionSuggest, packagesNotComplete[0], packagesNotComplete[1], activeRoute);
+            }
+            else if (packagesNotComplete.Count == 0) {
+                return;
+            }*/
+            List<RoutePoint> virtualRoute = await GetRouteVirtual(geoCoordinates, activeRoute.Id);
+            await _routePointRepo.InsertAsync(virtualRoute);
         }
       
     }

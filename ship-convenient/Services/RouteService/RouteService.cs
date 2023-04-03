@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using ship_convenient.Constants.AccountConstant;
 using ship_convenient.Constants.ConfigConstant;
 using ship_convenient.Services.AccountService;
+using System.Linq;
 
 namespace ship_convenient.Services.RouteService
 {
@@ -98,7 +99,7 @@ namespace ship_convenient.Services.RouteService
         {
             ApiResponse<List<ResponseRoutePointModel>> response = new();
             Route? activeRoute = await _accountUtils.GetActiveRoute(accountId);
-            List<RoutePoint> routePoints = await _routePointRepo.GetAllAsync(predicate: (routePoint) => routePoint.RouteId == activeRoute.Id && routePoint.IsVitual == true);
+            List<RoutePoint> routePoints = await _routePointRepo.GetAllAsync(predicate: (routePoint) => routePoint.RouteId == activeRoute.Id && routePoint.IsVitual == true, orderBy: source => source.OrderBy(point => point.Index));
             List<ResponseRoutePointModel> virtualRoute = routePoints.Select(route => route.ToResponseModel()).ToList();
             response.ToSuccessResponse(virtualRoute, "Lấy danh sách điểm thành công");
             return response;

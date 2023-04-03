@@ -13,10 +13,12 @@ namespace ship_convenient.Controllers
     {
         private readonly ILogger<PackageController> _logger;
         private readonly IPackageService _packageService;
-        public PackageController(ILogger<PackageController> logger, IPackageService packageService)
+        private readonly PackageSuggestService _packageSuggestService;
+        public PackageController(ILogger<PackageController> logger, IPackageService packageService, PackageSuggestService packageSuggestService)
         {
             _logger = logger;
             _packageService = packageService;
+            _packageSuggestService = packageSuggestService;
         }
 
         [HttpGet]
@@ -101,6 +103,50 @@ namespace ship_convenient.Controllers
             {
                 /*ApiResponsePaginated<ResponseComboPackageModel> response = await _packageService.SuggestCombo(deliverId, pageIndex, pageSize);*/
                 ApiResponse<List<ResponseComboPackageModel>> response = await _packageService.SuggestComboV2(deliverId);
+                return SendResponse(response);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError("Api mapbox has exception : " + ex.Message);
+                return StatusCode(500, "Api mapbox has exception : " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get suggest combo has exception : " + ex.Message);
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("suggest")]
+        [SwaggerOperation(Summary = "Get suggest package not combo")]
+        [ProducesResponseType(typeof(ApiResponse<List<ResponseSuggestPackageModel>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SuugestPackage(Guid deliverId)
+        {
+            try
+            {
+                ApiResponse<List<ResponseSuggestPackageModel>> response = await _packageSuggestService.SuggestCombo(deliverId);
+                return SendResponse(response);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError("Api mapbox has exception : " + ex.Message);
+                return StatusCode(500, "Api mapbox has exception : " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get suggest combo has exception : " + ex.Message);
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("suggest-v2")]
+        [SwaggerOperation(Summary = "Get suggest package not combo")]
+        [ProducesResponseType(typeof(ApiResponse<List<ResponseSuggestPackageModel>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SugestPackageV2(Guid deliverId)
+        {
+            try
+            {
+                ApiResponse<List<ResponseSuggestPackageModel>> response = await _packageSuggestService.SuggestComboV2(deliverId);
                 return SendResponse(response);
             }
             catch (HttpRequestException ex)

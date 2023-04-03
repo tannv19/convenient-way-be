@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ship_convenient.Core.CoreModel;
+using ship_convenient.Helper.SuggestPackageHelper;
 using ship_convenient.Model.RouteModel;
+using ship_convenient.Services.AccountService;
 using ship_convenient.Services.RouteService;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -10,11 +12,13 @@ namespace ship_convenient.Controllers
     public class RouteController : BaseApiController
     {
         private readonly IRouteService _routeService;
+        private readonly IAccountService _accountService;
         private readonly ILogger<RouteController> _logger;
 
-        public RouteController(IRouteService routeService, ILogger<RouteController> logger)
+        public RouteController(IRouteService routeService,IAccountService accountService, ILogger<RouteController> logger)
         {
             _routeService = routeService;
+            _accountService = accountService;
             _logger = logger;
         }
 
@@ -120,6 +124,25 @@ namespace ship_convenient.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("Get list route point : " + ex.Message);
+                return StatusCode(500, ex.Message);
+            }
+
+        }
+
+        [HttpGet("order-point-virtual/{accountId}")]
+        [ProducesResponseType(typeof(ApiResponse<List<DistancePackageModel>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetListOrderPointVirtual(Guid accountId)
+        {
+
+            try
+            {
+                ApiResponse<List<DistancePackageModel>> response =
+                    await _accountService.GetOrderPointVirtual(accountId);
+                return SendResponse(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get order point virtual : " + ex.Message);
                 return StatusCode(500, ex.Message);
             }
 

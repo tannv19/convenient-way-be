@@ -11,6 +11,8 @@ namespace ship_convenient.Entities
         public string ToName { get; set; } = string.Empty;
         public double DistanceForward { get; set; }
         public double DistanceBackward { get; set; }
+        public double? DistanceForwardVirtual { get; set; }
+        public double? DistanceBackwardVirtual { get; set; }
         public double ToLatitude { get; set; }
         public double ToLongitude { get; set; }
 
@@ -37,6 +39,8 @@ namespace ship_convenient.Entities
             model.ToLatitude = this.ToLatitude;
             model.DistanceForward = this.DistanceForward;
             model.DistanceBackward = this.DistanceBackward;
+            model.DistanceForwardVirtual = this.DistanceForwardVirtual;
+            model.DistanceBackwardVirtual = this.DistanceBackwardVirtual;
             model.IsActive = this.IsActive;
             model.InfoUserId = this.InfoUserId;
             return model;
