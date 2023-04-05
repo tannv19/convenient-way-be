@@ -121,7 +121,7 @@ namespace ship_convenient.Services.PackageService
                 for (int i = 0; i < packageCount; i++)
                 {
                     bool isValidRouteAndDirection = MapHelper.IsTrueWithPackageAndUserRoute(
-                        directionSuggest, routePoints, route, packages[i], spacingValid * 0.5);
+                        directionSuggest, routePoints, route, packages[i], spacingValid * 0.6);
                     if (isValidRouteAndDirection)
                     {
                         List<GeoCoordinate> listPoints = MapHelper.GetListPointOrder(directionSuggest, packages[i], route);
@@ -238,7 +238,7 @@ namespace ship_convenient.Services.PackageService
                 for (int i = 0; i < packageCount; i++)
                 {
                     bool isValidRouteAndDirection = MapHelper.IsTrueWithPackageAndUserRoute(
-                        directionSuggest, routePointsOrigin, route, packages[i], spacingValid * 0.5);
+                        directionSuggest, routePointsOrigin, route, packages[i], spacingValid * 0.6);
                     if (isValidRouteAndDirection)
                     {
                         List<GeoCoordinate> listPoints = MapHelper.GetListPointOrderSecond(directionSuggest, oldPackage, packages[i], route);
@@ -369,7 +369,7 @@ namespace ship_convenient.Services.PackageService
                 for (int i = 0; i < packageCount; i++)
                 {
                     bool isValidRouteAndDirection = MapHelper.IsTrueWithPackageAndUserRoute(
-                        directionSuggest, routePointsOrigin, route, packages[i], spacingValid * 0.5);
+                        directionSuggest, routePointsOrigin, route, packages[i], spacingValid * 0.6);
                     if (isValidRouteAndDirection)
                     {
                         List<Package> allPackageWillOrder = new List<Package>(packagesNotComplete);

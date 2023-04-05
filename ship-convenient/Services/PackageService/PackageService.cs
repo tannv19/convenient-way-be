@@ -133,7 +133,7 @@ namespace ship_convenient.Services.PackageService
                 if (sender != null && !string.IsNullOrEmpty(sender.RegistrationToken))
                     errorSendNotification = await SendNotificationToAccount(_fcmService, notificationSender);
                 #endregion
-                await _packageUtils.NotificationValidUserWithPackage(package);
+                await _packageUtils.NotificationValidUserWithPackageV2(package);
             }
             #region Response result
             response.Success = result > 0 ? true : false;
