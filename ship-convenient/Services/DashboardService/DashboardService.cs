@@ -35,6 +35,7 @@ namespace ship_convenient.Services.DashboardService
             int refundSuccess = packages.Where(p => p.Status == PackageStatus.REFUND_TO_WAREHOUSE_SUCCESS).Count();
             int refundFailed = packages.Where(p => p.Status == PackageStatus.REFUND_TO_WAREHOUSE_FAILED).Count();
             int success = packages.Where(p => p.Status == PackageStatus.SUCCESS).Count();
+            int expired = packages.Where(p => p.Status == PackageStatus.EXPIRED).Count();
             int all = packages.Count();
             PackageCountModel result = new PackageCountModel
             {
@@ -50,6 +51,7 @@ namespace ship_convenient.Services.DashboardService
                 DeliveredSuccess = deliveredSuccess,
                 DeliveredFailed = deliveredFailed,
                 RefundToWarehouseSuccess = refundSuccess,
+                Expired = expired,
                 RefundToWarehouseFailed = refundFailed,
                 Success = success
             };
