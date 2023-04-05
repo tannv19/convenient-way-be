@@ -81,6 +81,7 @@ namespace ship_convenient.Services.DashboardService
             int refundSuccess = packages.Where(p => p.Status == PackageStatus.REFUND_TO_WAREHOUSE_SUCCESS).Count();
             int refundFailed = packages.Where(p => p.Status == PackageStatus.REFUND_TO_WAREHOUSE_FAILED).Count();
             int success = packages.Where(p => p.Status == PackageStatus.SUCCESS).Count();
+            int expired = packages.Where(p => p.Status == PackageStatus.EXPIRED).Count();
             int all = packages.Count();
             PackageCountModel result = new PackageCountModel
             {
@@ -97,7 +98,8 @@ namespace ship_convenient.Services.DashboardService
                 DeliveredFailed = deliveredFailed,
                 RefundToWarehouseSuccess = refundSuccess,
                 RefundToWarehouseFailed = refundFailed,
-                Success = success
+                Success = success,
+                Expired = expired
             };
             response.ToSuccessResponse(result, "Lấy thông tin thành công");
             return response;
