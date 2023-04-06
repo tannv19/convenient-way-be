@@ -4,7 +4,9 @@ using ship_convenient.Constants.ConfigConstant;
 using ship_convenient.Core.CoreModel;
 using ship_convenient.Core.UnitOfWork;
 using ship_convenient.Entities;
+using ship_convenient.Model.PackageModel;
 using ship_convenient.Services.GenericService;
+using ship_convenient.Services.PackageService;
 using unitofwork_core.Constant.Package;
 using Route = ship_convenient.Entities.Route;
 
@@ -12,18 +14,32 @@ namespace ship_convenient.Services.ScriptService
 {
     public class ScriptService : GenericService<ScriptService>,IScriptService
     {
+        private readonly IPackageService _packageService;
+       
         private const string MarkScript = "[script]";
         double minLongitude = 106.60934755879953;
         double maxLongitude = 106.82648934410292;
         double minLatitude = 10.77371671523056;
         double maxLatitude = 10.843294269787952;
-        public ScriptService(ILogger<ScriptService> logger, IUnitOfWork unitOfWork) : base(logger, unitOfWork)
+        public ScriptService(ILogger<ScriptService> logger, IUnitOfWork unitOfWork, IPackageService packageService) : base(logger, unitOfWork)
         {
+            this._packageService = packageService;
         }
 
-        public Task<ApiResponse> ApprovedPackages()
+        public async Task<ApiResponse> ApprovedPackages()
         {
-            throw new NotImplementedException();
+            ApiResponse response = new ApiResponse();
+            List<Package> packages = _unitOfWork.Packages.GetAll(predicate: p => p.StartAddress.Contains(MarkScript));
+            int indexPackage = 0;
+            string log = "";
+            for (int i = 0; i < packages.Count; i++)
+            {
+                await _packageService.ApprovedPackage(packages[i].Id, isNotify: false);
+                log += $"{indexPackage}. {packages[i].Id} đã được duyệt";
+                indexPackage++;
+            }
+            response.ToSuccessResponse($"{indexPackage} gói hàng đã được duyệt\n {log}" );
+            return response;
         }
         // acccount : username
         public async Task<ApiResponse> CreateActiveAccount()
@@ -77,6 +93,7 @@ namespace ship_convenient.Services.ScriptService
                 CreateDefaultConfig(infoUser);
                 infoUser.Routes.Add(FakerRoute.Generate());
                 accounts[i].InfoUser = infoUser;
+                
             }
             for (int i = 0; i < accountSenders.Count; i++)
             {
@@ -96,6 +113,7 @@ namespace ship_convenient.Services.ScriptService
             ApiResponse response = new();
             List<Account> scriptSenders = await _accountRepo.GetAllAsync(
                 predicate: acc => acc.UserName.Contains(MarkScript));
+            List<Guid> senderIds = scriptSenders.Select(a => a.Id).ToList();
             Faker<Package> FakerPackage = new Faker<Package>()
                .RuleFor(o => o.StartAddress, faker => faker.Address.FullAddress() + MarkScript)
                .RuleFor(o => o.StartLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
@@ -116,7 +134,7 @@ namespace ship_convenient.Services.ScriptService
                .RuleFor(o => o.Note, faker => faker.Lorem.Sentence(6))
                .RuleFor(o => o.PriceShip, faker => faker.Random.Int(min: 10, max: 40) * 1000)
                .RuleFor(o => o.Status, faker => PackageStatus.WAITING)
-               .RuleFor(o => o.Sender, faker => faker.PickRandom(scriptSenders));
+               .RuleFor(o => o.SenderId, faker => faker.PickRandom(senderIds));
             List<Package> packages = FakerPackage.Generate(100);
             for (int i = 0; i < packages.Count; i++)
             {
@@ -129,23 +147,76 @@ namespace ship_convenient.Services.ScriptService
             }
             await _packageRepo.InsertAsync(packages);
             await _unitOfWork.CompleteAsync();
-            response.ToSuccessResponse("Đã tạo 100 gói hàng");
+            string log = "";
+            for (int i = 0; i < packages.Count; i++)
+            {
+                log += i + ". "+ packages[i].Id.ToString() + "\n";
+            }
+            response.ToSuccessResponse("Đã tạo 100 gói hàng\n" + log);
             return response;
         }
 
-        public Task<ApiResponse> DeliveredSuccessPackages()
+        public Task<ApiResponse> DeliveredPackages()
         {
             throw new NotImplementedException();
+
+
         }
 
-        public Task<ApiResponse> PickupSuccessPackages()
+        public async Task<ApiResponse> PickupPackages()
         {
-            throw new NotImplementedException();
+            ApiResponse response = new ApiResponse();
+            List<Package> packages = _unitOfWork.Packages.GetAll(predicate: p => p.StartAddress.Contains(MarkScript) && p.Status == PackageStatus.SELECTED);
+            List<Package> packagesSuccess = packages.Skip(0).Take(40).ToList();
+            List<Package> packagesFailed = packages.Skip(40).Take(20).ToList();
+
+            string logTotal = $"{packages.Count} đang chờ lấy\n";
+            string logSuccess = $"{packagesSuccess.Count} đã được lấy thành công\n";
+            for (int i = 0; i < packagesSuccess.Count; i++)
+            {
+                await _packageService.PickupPackageSuccess(packagesSuccess[i].Id);
+                logSuccess += $"{i}. {packagesSuccess[i].Id}\n";
+            }
+            List<string> reasonPickupFailed = new List<string> { 
+                "Không liên lạc được", "Hàng quá khổ", "Hàng không giống ảnh", "Người gửi bận"
+            };
+            string logFailed = $"{packagesFailed.Count} đã lấy thất bại\n";
+            for (int i = 0; i < packagesFailed.Count; i++)
+            {
+                Random random = new Random();
+                PickupPackageFailedModel model = new PickupPackageFailedModel();
+                model.PackageId = packagesFailed[i].Id;
+                model.Reason = reasonPickupFailed[random.Next(0, 3)];
+                await _packageService.PickupPackageFailed(model);
+                logFailed += $"{i}. {packages[i].Id} - {model.Reason}\n";
+            }
+            logTotal += logSuccess + "===========\n" + logFailed;
+            response.ToSuccessResponse(logTotal);
+            return response;
         }
 
-        public Task<ApiResponse> SelectedPackages()
+        public async Task<ApiResponse> SelectedPackages()
         {
-            throw new NotImplementedException();
+            ApiResponse response = new();
+            List<Account> deliverScript = _accountRepo.GetAll(
+              predicate: acc => acc.UserName.Contains(MarkScript) && acc.Role == RoleName.DELIVER);
+            List<Package> packagesScript = _packageRepo.GetAll(
+                predicate: p => p.Sender.UserName.Contains(MarkScript));
+            int indexLog = 0;
+            string logSelected = "";
+            for (int i = 0; i < deliverScript.Count; i++)
+            {
+                List<Package> packageForDeliver = packagesScript.Skip(i * 3).Take(3).ToList();
+                List<Guid> packageIds = packageForDeliver.Select(p => p.Id).ToList();
+                for (int j = 0; j < packageForDeliver.Count; j++)
+                {
+                    logSelected += indexLog + ". " + packageForDeliver[j].Id.ToString() + $"Đã được nhận bởi ({deliverScript[i].GetFullName()})" +"\n";
+                    indexLog++;
+                }
+                await _packageService.DeliverSelectedPackages(deliverScript[i].Id, packageIds, isScript: true);
+            }
+            response.ToSuccessResponse($"{indexLog} gói hàng đã được nhận\n" + logSelected);
+            return response;
         }
 
         public void CreateDefaultConfig(InfoUser infoUser)

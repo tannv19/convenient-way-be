@@ -12,9 +12,9 @@ namespace ship_convenient.Services.PackageService
         Task<ApiResponse<ResponsePackageModel>> GetById(Guid id);
         Task<ApiResponsePaginated<ResponsePackageModel>> GetFilter(Guid? deliverId, Guid? senderId, string? status, int pageIndex, int pageSize);
         Task<ApiResponse<List<ResponsePackageModel>>> GetAll(Guid deliverId, Guid senderId, string? status);
-        Task<ApiResponse> ApprovedPackage(Guid id);
+        Task<ApiResponse> ApprovedPackage(Guid id, bool isNotify = true);
         Task<ApiResponse> RejectPackage(Guid id);
-        Task<ApiResponse> DeliverSelectedPackages(Guid deliverId, List<Guid> packageIds);
+        Task<ApiResponse> DeliverSelectedPackages(Guid deliverId, List<Guid> packageIds, bool isScript = false);
         Task<ApiResponse> SenderCancelPackage(Guid packageId, string? reason);
         Task<ApiResponse> DeliverCancelPackage(Guid packageId, string? reason);
         Task<ApiResponse> PickupPackageFailed(PickupPackageFailedModel model);

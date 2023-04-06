@@ -8,8 +8,8 @@ namespace ship_convenient.Services.ScriptService
         Task<ApiResponse> CreatePackages();
         Task<ApiResponse> ApprovedPackages();
         Task<ApiResponse> SelectedPackages();
-        Task<ApiResponse> PickupSuccessPackages();
-        Task<ApiResponse> DeliveredSuccessPackages();
+        Task<ApiResponse> PickupPackages();
+        Task<ApiResponse> DeliveredPackages();
         Task<ApiResponse> RemoveScriptData();
     }
 }

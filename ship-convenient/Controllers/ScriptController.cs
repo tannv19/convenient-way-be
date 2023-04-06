@@ -49,21 +49,21 @@ namespace ship_convenient.Controllers
             return Ok(response);
         }
 
-        [HttpGet("pickup-success-packages")]
+        [HttpGet("pickup-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PickupSuccessPackages()
         {
-            var response = await _scriptService.PickupSuccessPackages();
+            var response = await _scriptService.PickupPackages();
             return Ok(response);
         }
 
-        [HttpGet("delivered-success-packages")]
+        [HttpGet("delivered-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeliveredSuccessPackages()
         {
-            var response = await _scriptService.DeliveredSuccessPackages();
+            var response = await _scriptService.DeliveredPackages();
             return Ok(response);
         }
 

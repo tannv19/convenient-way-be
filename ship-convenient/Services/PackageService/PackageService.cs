@@ -88,12 +88,12 @@ namespace ship_convenient.Services.PackageService
             return response;
         }
 
-        public async Task<ApiResponse> ApprovedPackage(Guid id)
+        public async Task<ApiResponse> ApprovedPackage(Guid id, bool isNotify = true)
         {
             ApiResponse response = new ApiResponse();
             Package? package = await _packageRepo.GetByIdAsync(id, disableTracking: false
                    );
-
+            
             #region Verify params
             if (package == null)
             {
@@ -126,7 +126,7 @@ namespace ship_convenient.Services.PackageService
             #endregion
             int result = await _unitOfWork.CompleteAsync();
             string? errorSendNotification;
-            if (result > 0)
+            if (result > 0 && isNotify)
             {
                 #region Send notification to sender
                 Account? sender = await _accountRepo.GetByIdAsync(package.SenderId);
@@ -792,7 +792,7 @@ namespace ship_convenient.Services.PackageService
             return response;
         }
 
-        public async Task<ApiResponse> DeliverSelectedPackages(Guid deliverId, List<Guid> packageIds)
+        public async Task<ApiResponse> DeliverSelectedPackages(Guid deliverId, List<Guid> packageIds, bool isScript = false)
         {
             ApiResponse response = new ApiResponse();
 
@@ -857,7 +857,7 @@ namespace ship_convenient.Services.PackageService
             }*/
             #endregion
             List<string> statusNotComplete = new List<string> {
-                PackageStatus.SELECTED, PackageStatus.PICKUP_SUCCESS, PackageStatus.DELIVERED_FAILED
+                PackageStatus.SELECTED, PackageStatus.PICKUP_SUCCESS
             };
             Expression<Func<Package, bool>> predicate = pa => pa.DeliverId == deliverId && statusNotComplete.Contains(pa.Status);
             List<Package> packagesNotComplete = await _packageRepo.GetAllAsync(predicate: predicate);
@@ -892,7 +892,7 @@ namespace ship_convenient.Services.PackageService
 
             int result = await _unitOfWork.CompleteAsync();
             #region Send notification to senders
-            if (result > 0)
+            if (result > 0 && !isScript)
             {
                 for (int i = 0; i < notifications.Count; i++)
                 {
