@@ -155,7 +155,7 @@ namespace ship_convenient.Services.PackageService
                                 bool isMaxSpacingError = listPolyline[0].Distance > spacingValid + activeRoute.DistanceForward;
                                 if (!isMaxSpacingError)
                                 {
-
+                                    await SendNotificationNewPackage(account.Id);
                                 }
                             }
                             else if (directionSuggest == DirectionTypeConstant.BACKWARD)
