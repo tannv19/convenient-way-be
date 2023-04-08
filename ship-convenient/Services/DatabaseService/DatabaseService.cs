@@ -46,7 +46,7 @@ namespace ship_convenient.Services.DatabaseService
             double minLatitude = 10.77371671523056;
             double maxLatitude = 10.843294269787952;
 
-            List<string> avatarsLink = new List<string>();
+            /*List<string> avatarsLink = new List<string>();
             avatarsLink.Add("https://cdn-icons-png.flaticon.com/512/4333/4333609.png");
             avatarsLink.Add("https://cdn-icons-png.flaticon.com/512/2202/2202112.png");
             avatarsLink.Add("https://cdn-icons-png.flaticon.com/512/4140/4140047.png");
@@ -84,7 +84,7 @@ namespace ship_convenient.Services.DatabaseService
                 InfoUser infoUser = FakerInfoUser.Generate();
                 infoUser.Routes.Add(FakerRoute.Generate());
                 accounts[i].InfoUser = infoUser;
-            }
+            }*/
             Account admin = new Account
             {
                 UserName = "admin",
@@ -105,7 +105,7 @@ namespace ship_convenient.Services.DatabaseService
 
             await _accountRepo.InsertAsync(admin);
             await _accountRepo.InsertAsync(adminBalance);
-            await _accountRepo.InsertAsync(accounts);
+            // await _accountRepo.InsertAsync(accounts);
 
 
 

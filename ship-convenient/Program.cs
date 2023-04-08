@@ -4,9 +4,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 Console.OutputEncoding = Encoding.GetEncoding("UTF-8");
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+builder.Logging.AddAzureWebAppDiagnostics();
 
 // Add services to the container.
 
