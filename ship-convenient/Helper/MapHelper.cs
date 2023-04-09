@@ -500,6 +500,7 @@ namespace ship_convenient.Helper
                 bool isValidSuggestDirection = ValidSuggestDirectionPackage(directionType, package, route);
                 result = IsValidPackageWithRouteBackward(routePoints, package, spacingValid) && isValidSuggestDirection;
             }
+            
             return result;
         }
 

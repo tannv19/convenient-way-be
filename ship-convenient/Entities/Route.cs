@@ -1,4 +1,5 @@
-﻿using ship_convenient.Model.RouteModel;
+﻿using ship_convenient.Constants.ConfigConstant;
+using ship_convenient.Model.RouteModel;
 
 namespace ship_convenient.Entities
 {
@@ -44,6 +45,20 @@ namespace ship_convenient.Entities
             model.IsActive = this.IsActive;
             model.InfoUserId = this.InfoUserId;
             return model;
+        }
+
+        public double GetDistanceSuggest(string suggestDirection) {
+            double result = 0;
+            if (suggestDirection == DirectionTypeConstant.TWO_WAY)
+            {
+                result = DistanceForward + DistanceBackward;
+            }
+            else if (suggestDirection == DirectionTypeConstant.FORWARD) {
+                result = DistanceForward;
+            } else if (suggestDirection == DirectionTypeConstant.BACKWARD){
+                result = DistanceBackward;
+            }
+            return result;
         }
     }
 }
