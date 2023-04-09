@@ -20,8 +20,10 @@ namespace ship_convenient.Entities.Config
                 .WithOne(f => f.Creator).HasForeignKey(f => f.CreatorId).OnDelete(DeleteBehavior.NoAction);
             builder.HasMany(ac => ac.ReceiverFeedbacks)
                 .WithOne(f => f.Receiver).HasForeignKey(f => f.ReceiverId).OnDelete(DeleteBehavior.NoAction);
-            builder.HasMany(ac => ac.Reports)
-                .WithOne(re => re.Account).HasForeignKey(re => re.AccountId).OnDelete(DeleteBehavior.NoAction);
+            builder.HasMany(ac => ac.CreatorReports)
+                .WithOne(re => re.Creator).HasForeignKey(re => re.CreatorId).OnDelete(DeleteBehavior.NoAction);
+            builder.HasMany(ac => ac.ReceiverReports)
+                .WithOne(re => re.Receiver).HasForeignKey(re => re.ReceiverId).OnDelete(DeleteBehavior.NoAction);
             builder.HasMany(ac => ac.Transactions)
                 .WithOne(tr => tr.Account).HasForeignKey(tr => tr.AccountId);
             builder.HasOne(ac => ac.InfoUser)

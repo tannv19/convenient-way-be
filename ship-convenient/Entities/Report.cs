@@ -14,8 +14,10 @@ namespace ship_convenient.Entities
         #region Relationship
         public Guid PackageId { get; set; }
         public Package? Package { get; set; }
-        public Guid AccountId { get; set; }
-        public Account? Account { get; set; }
+        public Guid CreatorId { get; set; }
+        public Account? Creator { get; set; }
+        public Guid ReceiverId { get; set; }
+        public Account? Receiver { get; set; }
         #endregion
 
         public ResponseReportModel ToResponseModel() {
@@ -31,8 +33,10 @@ namespace ship_convenient.Entities
                 ModifiedAt = ModifiedAt,
                 PackageId = PackageId,
                 Package = Package?.ToResponseModel(),
-                AccountId = AccountId,
-                Account = Account?.ToResponseModel(),
+                CreatorId = CreatorId,
+                Creator = Creator?.ToResponseModel(),
+                ReceiverId = ReceiverId,
+                Receiver = Receiver?.ToResponseModel()
             };
         }
     }

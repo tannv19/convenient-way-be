@@ -5,6 +5,6 @@ namespace ship_convenient.Services.ReportService
 {
     public interface IReportService
     {
-        Task<ApiResponsePaginated<ResponseReportModel>> GetList(Guid? accountId, int page, int pageSize);
+        Task<ApiResponsePaginated<ResponseReportModel>> GetList(Guid? creatorId,Guid? receiverId, int page, int pageSize);
     }
 }

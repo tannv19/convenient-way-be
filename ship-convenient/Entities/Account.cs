@@ -20,9 +20,10 @@ namespace ship_convenient.Entities
         public List<Package> PackageDelivers { get; set; }
         public List<Feedback> CreatorFeedbacks { get; set; }
         public List<Feedback> ReceiverFeedbacks { get; set; }
+        public List<Report> CreatorReports { get; set; }
+        public List<Report> ReceiverReports { get; set; }
         public List<Transaction> Transactions { get; set; }
         public List<Deposit> Deposits { get; set; }
-        public List<Report> Reports { get; set; }
         #endregion
 
         public Account()
@@ -34,7 +35,8 @@ namespace ship_convenient.Entities
             Deposits = new List<Deposit>();
             CreatorFeedbacks = new List<Feedback>();
             ReceiverFeedbacks = new List<Feedback>();
-            Reports = new List<Report>();
+            CreatorReports = new List<Report>();
+            ReceiverReports = new List<Report>();
         }
 
         public ResponseAccountModel ToResponseModel()

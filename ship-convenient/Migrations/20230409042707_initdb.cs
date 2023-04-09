@@ -197,7 +197,10 @@ namespace ship_convenient.Migrations
                     FromLatitude = table.Column<double>(type: "float", nullable: false),
                     FromLongitude = table.Column<double>(type: "float", nullable: false),
                     ToName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Distance = table.Column<double>(type: "float", nullable: false),
+                    DistanceForward = table.Column<double>(type: "float", nullable: false),
+                    DistanceBackward = table.Column<double>(type: "float", nullable: false),
+                    DistanceForwardVirtual = table.Column<double>(type: "float", nullable: true),
+                    DistanceBackwardVirtual = table.Column<double>(type: "float", nullable: true),
                     ToLatitude = table.Column<double>(type: "float", nullable: false),
                     ToLongitude = table.Column<double>(type: "float", nullable: false),
                     InfoUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
@@ -327,17 +330,29 @@ namespace ship_convenient.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TypeOfReport = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Note = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Result = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    PackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    PackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReceiverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Report", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Report_Account_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "Account",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Report_Account_ReceiverId",
+                        column: x => x.ReceiverId,
+                        principalTable: "Account",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Report_Package_PackageId",
                         column: x => x.PackageId,
@@ -417,6 +432,7 @@ namespace ship_convenient.Migrations
                     Longitude = table.Column<double>(type: "float", nullable: false),
                     Index = table.Column<int>(type: "int", nullable: false),
                     DirectionType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsVitual = table.Column<bool>(type: "bit", nullable: false),
                     RouteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -492,9 +508,19 @@ namespace ship_convenient.Migrations
                 column: "PackageId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Report_CreatorId",
+                table: "Report",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Report_PackageId",
                 table: "Report",
                 column: "PackageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Report_ReceiverId",
+                table: "Report",
+                column: "ReceiverId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Route_InfoUserId",

@@ -18,7 +18,7 @@ namespace ship_convenient.Services.ReportService
             _reportRepo = unitOfWork.Reports;
         }
 
-        public async Task<ApiResponsePaginated<ResponseReportModel>> GetList(Guid? accountId, int pageIndex, int pageSize)
+        public async Task<ApiResponsePaginated<ResponseReportModel>> GetList(Guid? creatorId,Guid? receiverId, int pageIndex, int pageSize)
         {
             ApiResponsePaginated<ResponseReportModel> response = new();
             #region Verify params
@@ -31,17 +31,23 @@ namespace ship_convenient.Services.ReportService
 
             #region Includable
             Func<IQueryable<Report>, IIncludableQueryable<Report, object?>> include = (source) => source.Include(r => r.Package)
-                .Include(r => r.Account);
+                .Include(r => r.Creator).ThenInclude(a => a.InfoUser)
+                .Include(r => r.Receiver).ThenInclude(a => a.InfoUser);
             #endregion
 
             #region Predicates
             List<Expression<Func<Report, bool>>> predicates = new List<Expression<Func<Report, bool>>>();
-            if (accountId != Guid.Empty && accountId != null)
+            if (creatorId != null)
             {
-                Expression<Func<Report, bool>> filterAccount = (p) => p.AccountId == accountId;
+                Expression<Func<Report, bool>> filterAccount = (p) => p.CreatorId == creatorId;
                 predicates.Add(filterAccount);
             }
-            
+            if (receiverId != null)
+            {
+                Expression<Func<Report, bool>> filterAccount = (p) => p.ReceiverId == receiverId;
+                predicates.Add(filterAccount);
+            }
+
             #endregion
 
             #region Order

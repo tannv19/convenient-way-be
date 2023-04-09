@@ -15,9 +15,11 @@ namespace ship_convenient.Model.ReportModel
         public DateTime ModifiedAt { get; set; }
         public Guid PackageId { get; set; }
         public ResponsePackageModel? Package { get; set; }
-        public Guid AccountId { get; set; }
-        public ResponseAccountModel? Account { get; set; }
+        public Guid CreatorId { get; set; }
+        public ResponseAccountModel? Creator { get; set; }
+        public Guid ReceiverId { get; set; }
+        public ResponseAccountModel? Receiver { get; set; }
 
-        
+
     }
 }

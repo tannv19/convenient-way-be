@@ -16,9 +16,9 @@ namespace ship_convenient.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetList(Guid? accountId, int pageIndex = 0, int pageSize = 20)
+        public async Task<IActionResult> GetList(Guid? creatorId,Guid? receiverId, int pageIndex = 0, int pageSize = 20)
         {
-            var response = await _reportService.GetList(accountId, pageIndex, pageSize);
+            var response = await _reportService.GetList(creatorId,receiverId, pageIndex, pageSize);
             return Ok(response);
         }
     }

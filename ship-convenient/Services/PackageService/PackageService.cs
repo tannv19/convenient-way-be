@@ -1900,7 +1900,8 @@ namespace ship_convenient.Services.PackageService
             Expression<Func<Account, bool>> predicateAdminBalance = (acc) => acc.Role == RoleName.ADMIN_BALANCE;
             Report report = new Report();
             report.PackageId = package.Id;
-            report.AccountId = model.AccountId;
+            report.CreatorId = model.CreatorId;
+            report.ReceiverId = model.ReceiverId;
             report.Status = ReportStatus.PENDING;
             report.Reason = model.Reason;
             report.TypeOfReport = "OTHER";
