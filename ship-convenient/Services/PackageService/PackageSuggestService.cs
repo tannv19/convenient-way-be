@@ -374,17 +374,14 @@ namespace ship_convenient.Services.PackageService
                 
                 for (int i = 0; i < packageCount; i++)
                 {
-                    /*_logger.LogInformation($"{i}. =============================");
+                    _logger.LogInformation($"{i}. =============================");
                     _logger.LogInformation($"Mã gói hàng: {packages[i].Id}");
                     _logger.LogInformation($"Điểm lấy hàng: {packages[i].StartAddress}");
-                    _logger.LogInformation($"Điểm giao hàng: {packages[i].DestinationAddress}");*/
-                    Console.WriteLine($"{i}. =============================");
-                    Console.WriteLine($"Mã gói hàng: {packages[i].Id}");
-                    Console.WriteLine($"Điểm lấy hàng: {packages[i].StartAddress}");
-                    Console.WriteLine($"Điểm giao hàng: {packages[i].DestinationAddress}");
+                    _logger.LogInformation($"Điểm giao hàng: {packages[i].DestinationAddress}");
+
                     bool isValidRouteAndDirection = MapHelper.IsTrueWithPackageAndUserRoute(
                         directionSuggest, routePointsOrigin, route, packages[i], spacingValid * 0.6);
-                    Console.WriteLine($"Kiểm tra hướng và khoảng cách của gói hàng đường chim bay: {isValidRouteAndDirection}");
+                    _logger.LogInformation($"Kiểm tra hướng và khoảng cách của gói hàng đường chim bay: {isValidRouteAndDirection}");
                     if (isValidRouteAndDirection)
                     {
                         List<Package> allPackageWillOrder = new List<Package>(packagesNotComplete);
@@ -392,7 +389,7 @@ namespace ship_convenient.Services.PackageService
                         List<GeoCoordinate> listPoints = SuggestPackageHelper.GetListPointOrder(directionSuggest, allPackageWillOrder, route);
                         DirectionApiModel requestModel = DirectionApiModel.FromListGeoCoordinate(listPoints);
                         List<ResponsePolyLineModel> listPolyline = await _mapboxService.GetPolyLine(requestModel);
-                        Console.WriteLine($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance)}km");
+                        _logger.LogInformation($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance)}km");
                         if (listPolyline.Count > 0)
                         {
                             if (directionSuggest == DirectionTypeConstant.FORWARD)
@@ -409,7 +406,7 @@ namespace ship_convenient.Services.PackageService
                             else if (directionSuggest == DirectionTypeConstant.BACKWARD)
                             {
                                 bool isMaxSpacingError = listPolyline[0].Distance > spacingValid + route.DistanceBackward;
-                                Console.WriteLine(isMaxSpacingError ? "Gói hàng không hợp lệ" : "Gói hàng hợp lệ");
+                                _logger.LogInformation(isMaxSpacingError ? "Gói hàng không hợp lệ" : "Gói hàng hợp lệ");
                                 if (!isMaxSpacingError)
                                 {
                                     ResponseSuggestPackageModel suggest = packages[i].ToResponseSuggestModel();
@@ -421,7 +418,7 @@ namespace ship_convenient.Services.PackageService
                             {
                                 {
                                     bool isMaxSpacingError = listPolyline[0].Distance > spacingValid + route.DistanceForward + route.DistanceBackward;
-                                    Console.WriteLine(isMaxSpacingError ? "Gói hàng không hợp lệ" : "Gói hàng hợp lệ");
+                                    _logger.LogInformation(isMaxSpacingError ? "Gói hàng không hợp lệ" : "Gói hàng hợp lệ");
                                     if (!isMaxSpacingError)
                                     {
                                         ResponseSuggestPackageModel suggest = packages[i].ToResponseSuggestModel();
