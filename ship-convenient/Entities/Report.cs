@@ -1,4 +1,6 @@
-﻿namespace ship_convenient.Entities
+﻿using ship_convenient.Model.ReportModel;
+
+namespace ship_convenient.Entities
 {
     public class Report : BaseEntity
     {
@@ -15,5 +17,23 @@
         public Guid AccountId { get; set; }
         public Account? Account { get; set; }
         #endregion
+
+        public ResponseReportModel ToResponseModel() {
+            return new ResponseReportModel()
+            {
+                Id = Id,
+                TypeOfReport = TypeOfReport,
+                Reason = Reason,
+                Status = Status,
+                Note = Note,
+                Result = Result,
+                CreatedAt = CreatedAt,
+                ModifiedAt = ModifiedAt,
+                PackageId = PackageId,
+                Package = Package?.ToResponseModel(),
+                AccountId = AccountId,
+                Account = Account?.ToResponseModel(),
+            };
+        }
     }
 }

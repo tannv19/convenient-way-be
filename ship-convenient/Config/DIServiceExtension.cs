@@ -13,6 +13,7 @@ using ship_convenient.Services.GoongService;
 using ship_convenient.Services.MapboxService;
 using ship_convenient.Services.Notificationservice;
 using ship_convenient.Services.PackageService;
+using ship_convenient.Services.ReportService;
 using ship_convenient.Services.RouteService;
 using ship_convenient.Services.ScriptService;
 using ship_convenient.Services.SendSmsService;
@@ -46,6 +47,7 @@ namespace ship_convenient.Config
             services.AddTransient<IDashboardService, DashboardService>();
             services.AddTransient<ISendSMSService, SendSmsService>();
             services.AddTransient<IScriptService, ScriptService>();
+            services.AddScoped<IReportService, ReportService>();
             services.AddScoped<PackageUtils>();
             services.AddScoped<AccountUtils>();  
             services.AddScoped<PackageSuggestService>();

@@ -8,7 +8,7 @@ namespace ship_convenient.Config
         {
             services.AddHttpLogging(options =>
             {
-                options.LoggingFields = HttpLoggingFields.RequestPath | HttpLoggingFields.RequestHeaders | HttpLoggingFields.RequestBody | HttpLoggingFields.RequestQuery;
+                options.LoggingFields = HttpLoggingFields.RequestPath | HttpLoggingFields.RequestBody | HttpLoggingFields.RequestQuery;
                 
             });
         }
