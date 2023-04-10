@@ -8,7 +8,6 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Logging.AddAzureWebAppDiagnostics().AddConsole();
-builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
 
 // Add services to the container.
 

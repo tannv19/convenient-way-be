@@ -20,6 +20,18 @@ namespace ship_convenient.Model.MapboxModel
             return result;
         }
 
+        public string GetCoordsQueryGoong()
+        {
+            string result = "&origin=";
+            result += From.Latitude + "," + From.Longitude + "&destination=";
+            foreach (var item in To)
+            {
+                result += item.Latitude + "," + item.Longitude + ";";
+            }
+            result = result.Remove(result.Length - 1);
+            return result;
+        }
+
         static public DirectionApiModel FromListGeoCoordinate(List<GeoCoordinate> data) {
             DirectionApiModel result = new DirectionApiModel();
             result.From = new CoordinateApp(data[0].Longitude, data[0].Latitude);

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ship_convenient.Core.CoreModel;
 using ship_convenient.Model.GoongModel;
+using ship_convenient.Model.MapboxModel;
 using ship_convenient.Services.GoongService;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -82,6 +83,28 @@ namespace ship_convenient.Controllers
             {
                 ApiResponse<List<ResponseSearchModel>> response = await _goongService.GeocodingLocation(longitude, latitude);
                 return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Exception api goongng : " + ex.Message);
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("direction")]
+        [SwaggerOperation(summary: "Direction")]
+        public async Task<ActionResult<ApiResponse<List<ResponsePolyLineModel>>>> DirectionApi(
+            DirectionApiModel model)
+        {
+            try
+            {
+                List<ResponsePolyLineModel> polyLineModel = await _goongService.GetPolyLine(model);
+                return Ok(new ApiResponse<List<ResponsePolyLineModel>>
+                {
+                    Success = polyLineModel == null ? false : true,
+                    Message = polyLineModel == null ? "Thông tin tọa độ bị sai" : "Lấy thông tin thành công từ Goong",
+                    Data = polyLineModel,
+                });
             }
             catch (Exception ex)
             {

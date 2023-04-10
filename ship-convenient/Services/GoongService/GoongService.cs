@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using ship_convenient.Core.CoreModel;
 using ship_convenient.Model.GoongModel;
+using ship_convenient.Model.MapboxModel;
 
 namespace ship_convenient.Services.GoongService
 {
@@ -227,8 +228,29 @@ namespace ship_convenient.Services.GoongService
             return response;
         }
 
-       
+        public async Task<List<ResponsePolyLineModel>> GetPolyLine(DirectionApiModel model)
+        {
+            List<ResponsePolyLineModel> result;
+            JObject bodyResponse;
+            HttpClient client = new HttpClient();
 
+            HttpRequestMessage request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(_configuration["Goong:uriDirection"] + model.GetCoordsQueryGoong())
+            };
+            _logger.LogInformation("Request goong uri: " + request.RequestUri);
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                string body = await response.Content.ReadAsStringAsync();
+                bodyResponse = JObject.Parse(body);
+                result = PolyLineModel.GetLinesGoong(bodyResponse);
+                _logger.LogDebug("Time: " + result[0].Time + ", " + "Distance: " + result[0].Distance + " \n"
+                    + "From name: " + result[0].FromName + ", " + "To name: " + result[0].ToName);
 
+            }
+            return result;
+        }
     }
 }

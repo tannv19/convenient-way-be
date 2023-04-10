@@ -75,6 +75,40 @@ namespace ship_convenient.Model.MapboxModel
             return listLine;
         }
 
+        public static List<ResponsePolyLineModel> GetLinesGoong(JObject jsonMapbox)
+        {
+            List<ResponsePolyLineModel> listLine = new List<ResponsePolyLineModel>();
+
+            if (jsonMapbox is not null)
+            {
+                int routeCount = jsonMapbox["routes"]!.Count();
+                for (int i = 0; i < routeCount; i++)
+                {
+                    PolyLineModel lineMode = new PolyLineModel();
+                    lineMode.Distance = double.Parse(jsonMapbox["routes"]![i]!["legs"]![0]!["distance"]!["value"]!.ToString());
+                    lineMode.Time = double.Parse(jsonMapbox["routes"]![i]!["legs"]![0]!["duration"]!["value"]!.ToString());
+                    lineMode.FromName = jsonMapbox["routes"]![i]!["legs"]![0]!["start_address"]!.ToString();
+                    lineMode.ToName = jsonMapbox["routes"]![i]!["legs"]![0]!["end_address"]!.ToString();
+                    lineMode.From = new GeoCoordinate(longitude: double.Parse(jsonMapbox["routes"]![i]!["legs"]![0]!["start_location"]!["lng"]!.ToString()), latitude: double.Parse(jsonMapbox["routes"]![i]!["legs"]![0]!["start_location"]!["lat"]!.ToString()));
+                    lineMode.To = new GeoCoordinate(longitude: double.Parse(jsonMapbox["routes"]![i]!["legs"]![0]!["end_location"]!["lng"]!.ToString()), latitude: double.Parse(jsonMapbox["routes"]![i]!["legs"]![0]!["end_location"]!["lat"]!.ToString()));
+                    lineMode.PolyPoints = new List<GeoCoordinate>();
+                    int countPolyLine = jsonMapbox["routes"]![i]!["legs"]![0]!["steps"]!.Count();
+                    for (int j = 0; j < countPolyLine; j++)
+                    {
+                        if (jsonMapbox["routes"]![i]!["legs"]![0]!["steps"]![j] is not null)
+                        {
+                            double longitudePoint = double.Parse(jsonMapbox["routes"]![i]!["legs"]![0]!["steps"]![j]!["start_location"]!["lng"]!.ToString());
+                            double latitudePoint = double.Parse(jsonMapbox["routes"]![i]!["legs"]![0]!["steps"]![j]!["start_location"]!["lat"]!.ToString());
+                            GeoCoordinate point = new GeoCoordinate(latitudePoint, longitudePoint);
+                            lineMode.PolyPoints.Add(point);
+                        }
+                    }
+                    listLine.Add(lineMode.ToResponseModel());
+                }
+            }
+            return listLine;
+        }
+
         public ResponsePolyLineModel ToResponseModel()
         {
             ResponsePolyLineModel model = new ResponsePolyLineModel();
