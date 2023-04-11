@@ -3,6 +3,7 @@ using ship_convenient.Constants.ConfigConstant;
 using ship_convenient.Entities;
 using ship_convenient.Model.MapboxModel;
 using ship_convenient.Model.RouteModel;
+using ship_convenient.Services.PackageService;
 using RouteEntity = ship_convenient.Entities.Route;
 
 namespace ship_convenient.Helper
@@ -410,6 +411,71 @@ namespace ship_convenient.Helper
             return result;
         }
 
+        public static PackageDistanceValid IsValidPackageWithRouteTwoWayV2(List<RoutePoint> points,
+            Package package, double spacingValid = 2000)
+        {
+            PackageDistanceValid result = new();
+            List<RoutePoint> forwardRoute = points.Where(routePoint => routePoint.DirectionType == DirectionTypeConstant.FORWARD)
+                        .OrderBy(source => source.Index).ToList();
+            List<RoutePoint> backwardRoute = points.Where(routePoint => routePoint.DirectionType == DirectionTypeConstant.BACKWARD)
+                        .OrderBy(source => source.Index).ToList();
+            List<GeoCoordinate> geoCoordinateForward = forwardRoute.Select(x => new GeoCoordinate(x.Latitude, x.Longitude)).ToList();
+            List<GeoCoordinate> geoCoordinateBackward = backwardRoute.Select(x => new GeoCoordinate(x.Latitude, x.Longitude)).ToList();
+            int validNumberCoord = 0;
+            foreach (GeoCoordinate geoCoordinate in geoCoordinateForward)
+            {
+                GeoCoordinate packageStart = new GeoCoordinate(package.StartLatitude, package.StartLongitude);
+                double distanceShop = geoCoordinate.GetDistanceTo(packageStart);
+                if (distanceShop <= spacingValid)
+                {
+                    result.StartPointMinDistance = distanceShop;
+                    validNumberCoord++;
+                    break;
+                };
+            }
+            foreach (GeoCoordinate geoCoordinate in geoCoordinateBackward)
+            {
+                GeoCoordinate packageEnd = new GeoCoordinate(package.DestinationLatitude, package.DestinationLongitude);
+                double distancePackage = geoCoordinate.GetDistanceTo(packageEnd);
+                if (distancePackage <= spacingValid)
+                {
+                    result.EndPointMinDistance = distancePackage;
+                    validNumberCoord++;
+                    break;
+                };
+            }
+            if (validNumberCoord == 2)
+            {
+                result.IsValid = true;
+            }
+            else {
+                result.IsValid = false;
+                List<double> distanceWithStartPoint = new();
+                foreach (GeoCoordinate geoCoordinate in geoCoordinateForward)
+                {
+                    GeoCoordinate packageStart = new GeoCoordinate(package.StartLatitude, package.StartLongitude);
+                    double distanceStart = geoCoordinate.GetDistanceTo(packageStart);
+                    distanceWithStartPoint.Add(distanceStart);
+                }
+                double minDistanceStart = distanceWithStartPoint.Min();
+
+                List<double> distanceWithEndPoint = new();
+                foreach (GeoCoordinate geoCoordinate in geoCoordinateBackward)
+                {
+                    GeoCoordinate packageEnd = new GeoCoordinate(package.DestinationLatitude, package.DestinationLongitude);
+                    double distanceStart = geoCoordinate.GetDistanceTo(packageEnd);
+                    distanceWithEndPoint.Add(distanceStart);
+                }
+                double minDistanceEnd = distanceWithEndPoint.Min();
+
+                result.StartPointMinDistance = minDistanceStart;
+                result.EndPointMinDistance = minDistanceEnd;
+            }
+
+            return result;
+        }
+
+
         public static bool IsValidPackageWithRouteForward(List<RoutePoint> points,
             Package package, double spacingValid = 2000)
         {
@@ -441,6 +507,66 @@ namespace ship_convenient.Helper
             if (validNumberCoord == 2)
             {
                 result = true;
+            }
+
+            return result;
+        }
+
+        public static PackageDistanceValid IsValidPackageWithRouteForwardV2(List<RoutePoint> points,
+            Package package, double spacingValid = 2000)
+        {
+            PackageDistanceValid result = new();
+            List<RoutePoint> forwardRoute = points.Where(routePoint => routePoint.DirectionType == DirectionTypeConstant.FORWARD)
+                        .OrderBy(source => source.Index).ToList();
+            List<GeoCoordinate> geoCoordinateForward = forwardRoute.Select(x => new GeoCoordinate(x.Latitude, x.Longitude)).ToList();
+            int validNumberCoord = 0;
+            foreach (GeoCoordinate geoCoordinate in geoCoordinateForward)
+            {
+                GeoCoordinate packageStart = new GeoCoordinate(package.StartLatitude, package.StartLongitude);
+                double distanceShop = geoCoordinate.GetDistanceTo(packageStart);
+                if (distanceShop <= spacingValid)
+                {
+                    result.StartPointMinDistance = distanceShop;
+                    validNumberCoord++;
+                    break;
+                };
+            }
+            foreach (GeoCoordinate geoCoordinate in geoCoordinateForward)
+            {
+                GeoCoordinate packageEnd = new GeoCoordinate(package.DestinationLatitude, package.DestinationLongitude);
+                double distancePackage = geoCoordinate.GetDistanceTo(packageEnd);
+                if (distancePackage <= spacingValid)
+                {
+                    result.EndPointMinDistance = distancePackage;
+                    validNumberCoord++;
+                    break;
+                };
+            }
+            if (validNumberCoord == 2)
+            {
+                result.IsValid = true;
+            }
+            else {
+                result.IsValid = false;
+                List<double> distanceWithStartPoint = new();
+                foreach (GeoCoordinate geoCoordinate in geoCoordinateForward)
+                {
+                    GeoCoordinate packageStart = new GeoCoordinate(package.StartLatitude, package.StartLongitude);
+                    double distanceStart = geoCoordinate.GetDistanceTo(packageStart);
+                    distanceWithStartPoint.Add(distanceStart);
+                }
+                double minDistanceStart = distanceWithStartPoint.Min();
+
+                List<double> distanceWithEndPoint = new();
+                foreach (GeoCoordinate geoCoordinate in geoCoordinateForward)
+                {
+                    GeoCoordinate packageEnd = new GeoCoordinate(package.DestinationLatitude, package.DestinationLongitude);
+                    double distanceStart = geoCoordinate.GetDistanceTo(packageEnd);
+                    distanceWithEndPoint.Add(distanceStart);
+                }
+                double minDistanceEnd = distanceWithEndPoint.Min();
+                result.StartPointMinDistance = minDistanceStart;
+                result.EndPointMinDistance = minDistanceEnd;
             }
 
             return result;
@@ -482,6 +608,66 @@ namespace ship_convenient.Helper
             return result;
         }
 
+        public static PackageDistanceValid IsValidPackageWithRouteBackwardV2(List<RoutePoint> points,
+           Package package, double spacingValid = 2000)
+        {
+            PackageDistanceValid result = new();
+            List<RoutePoint> backwardRoute = points.Where(routePoint => routePoint.DirectionType == DirectionTypeConstant.BACKWARD)
+                        .OrderBy(source => source.Index).ToList();
+            List<GeoCoordinate> geoCoordinateBackward = backwardRoute.Select(x => new GeoCoordinate(x.Latitude, x.Longitude)).ToList();
+            int validNumberCoord = 0;
+            foreach (GeoCoordinate geoCoordinate in geoCoordinateBackward)
+            {
+                GeoCoordinate packageStart = new GeoCoordinate(package.StartLatitude, package.StartLongitude);
+                double distanceShop = geoCoordinate.GetDistanceTo(packageStart);
+                if (distanceShop <= spacingValid)
+                {
+                    result.StartPointMinDistance = distanceShop;
+                    validNumberCoord++;
+                    break;
+                };
+            }
+            foreach (GeoCoordinate geoCoordinate in geoCoordinateBackward)
+            {
+                GeoCoordinate packageEnd = new GeoCoordinate(package.DestinationLatitude, package.DestinationLongitude);
+                double distancePackage = geoCoordinate.GetDistanceTo(packageEnd);
+                if (distancePackage <= spacingValid)
+                {
+                    result.EndPointMinDistance = distancePackage;
+                    validNumberCoord++;
+                    break;
+                };
+            }
+            if (validNumberCoord == 2)
+            {
+                result.IsValid = true;
+            }
+            else {
+                result.IsValid = false;
+                List<double> distanceWithStartPoint = new();
+                foreach (GeoCoordinate geoCoordinate in geoCoordinateBackward)
+                {
+                    GeoCoordinate packageStart = new GeoCoordinate(package.StartLatitude, package.StartLongitude);
+                    double distanceStart = geoCoordinate.GetDistanceTo(packageStart);
+                    distanceWithStartPoint.Add(distanceStart);
+                }
+                double minDistanceStart = distanceWithStartPoint.Min();
+
+                List<double> distanceWithEndPoint = new();
+                foreach (GeoCoordinate geoCoordinate in geoCoordinateBackward)
+                {
+                    GeoCoordinate packageEnd = new GeoCoordinate(package.DestinationLatitude, package.DestinationLongitude);
+                    double distanceStart = geoCoordinate.GetDistanceTo(packageEnd);
+                    distanceWithEndPoint.Add(distanceStart);
+                }
+                double minDistanceEnd = distanceWithEndPoint.Min();
+                result.StartPointMinDistance = minDistanceStart;
+                result.EndPointMinDistance = minDistanceEnd;
+            }
+
+            return result;
+        }
+
         public static bool IsTrueWithPackageAndUserRoute(string directionType, List<RoutePoint> routePoints,
             RouteEntity route, Package package, double spacingValid = 2000)
         {
@@ -504,6 +690,54 @@ namespace ship_convenient.Helper
             return result;
         }
 
+        public static PackageDistanceValid IsTrueWithPackageAndUserRouteV2(string directionType, List<RoutePoint> routePoints,
+            RouteEntity route, Package package, double spacingValid = 2000)
+        {
+            PackageDistanceValid result = new();
+            if (directionType == DirectionTypeConstant.TWO_WAY)
+            {
+                result = IsValidPackageWithRouteTwoWayV2(routePoints, package, spacingValid);
+               
+            }
+            else if (directionType == DirectionTypeConstant.FORWARD)
+            {
+                bool isValidSuggestDirection = ValidSuggestDirectionPackage(directionType, package, route);
+                PackageDistanceValid packageDistance = IsValidPackageWithRouteForwardV2(routePoints, package, spacingValid);
+                result.StartPointMinDistance = packageDistance.StartPointMinDistance;
+                result.EndPointMinDistance = packageDistance.EndPointMinDistance;
+                if (isValidSuggestDirection && packageDistance.IsValid)
+                {
+                    result.IsValid = true;
+             
+                }
+                else
+                {
+                    result.IsValid = false;
+       
+                }
+
+            }
+            else if (directionType == DirectionTypeConstant.BACKWARD)
+            {
+                bool isValidSuggestDirection = ValidSuggestDirectionPackage(directionType, package, route);
+                PackageDistanceValid packageDistance = IsValidPackageWithRouteBackwardV2(routePoints, package, spacingValid);
+                result.StartPointMinDistance = packageDistance.StartPointMinDistance;
+                result.EndPointMinDistance = packageDistance.EndPointMinDistance;
+                if (isValidSuggestDirection && packageDistance.IsValid)
+                {
+                    result.IsValid = true;
+                }
+                else
+                {
+                    result.IsValid = false;
+                
+                }
+            }
+
+            return result;
+        }
+
+        
     }
         
     }

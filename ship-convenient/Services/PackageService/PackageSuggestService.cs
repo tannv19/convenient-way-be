@@ -317,7 +317,7 @@ namespace ship_convenient.Services.PackageService
             };
             Expression<Func<Package, bool>> predicate = pa => pa.DeliverId == deliverId && statusNotComplete.Contains(pa.Status);
             List<Package> packagesNotComplete = await _packageRepo.GetAllAsync(predicate: predicate);
-            response = await SuggestComboLogicV2(deliver, packagesNotComplete);
+            response = await SuggestComboLogicV3Log(deliver, packagesNotComplete);
             return response;
         }
 
@@ -390,6 +390,132 @@ namespace ship_convenient.Services.PackageService
                         DirectionApiModel requestModel = DirectionApiModel.FromListGeoCoordinate(listPoints);
                         List<ResponsePolyLineModel> listPolyline = await _mapboxService.GetPolyLine(requestModel);
                         _logger.LogInformation($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance/1000)}km");
+                        if (listPolyline.Count > 0)
+                        {
+                            if (directionSuggest == DirectionTypeConstant.FORWARD)
+                            {
+                                bool isMaxSpacingError = listPolyline[0].Distance > spacingValid + route.DistanceForward;
+                                _logger.LogInformation(isMaxSpacingError ? "Gói hàng không hợp lệ" : "Gói hàng hợp lệ");
+                                if (!isMaxSpacingError)
+                                {
+                                    ResponseSuggestPackageModel suggest = packages[i].ToResponseSuggestModel();
+                                    suggest.DistanceExtend = listPolyline[0].Distance ?? 0;
+                                    packagesValid.Add(suggest);
+                                }
+                            }
+                            else if (directionSuggest == DirectionTypeConstant.BACKWARD)
+                            {
+                                bool isMaxSpacingError = listPolyline[0].Distance > spacingValid + route.DistanceBackward;
+                                _logger.LogInformation(isMaxSpacingError ? "Gói hàng không hợp lệ" : "Gói hàng hợp lệ");
+                                if (!isMaxSpacingError)
+                                {
+                                    ResponseSuggestPackageModel suggest = packages[i].ToResponseSuggestModel();
+                                    suggest.DistanceExtend = listPolyline[0].Distance ?? 0;
+                                    packagesValid.Add(suggest);
+                                }
+                            }
+                            else if (directionSuggest == DirectionTypeConstant.TWO_WAY)
+                            {
+                                {
+                                    bool isMaxSpacingError = listPolyline[0].Distance > spacingValid + route.DistanceForward + route.DistanceBackward;
+                                    _logger.LogInformation(isMaxSpacingError ? "Gói hàng không hợp lệ" : "Gói hàng hợp lệ");
+                                    if (!isMaxSpacingError)
+                                    {
+                                        ResponseSuggestPackageModel suggest = packages[i].ToResponseSuggestModel();
+                                        suggest.DistanceExtend = listPolyline[0].Distance ?? 0;
+                                        packagesValid.Add(suggest);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region Valid package with balance
+            int balanceAvailable = await _accountUtils.AvailableBalanceAsync(deliver.Id);
+            packagesValid = packagesValid
+                .Where(pa => balanceAvailable - pa.GetPriceProducts() >= 0).ToList();
+            #endregion
+            int maxSuggestCombo = _configRepo.GetMaxSuggestCombo();
+            List<ResponseSuggestPackageModel> result = packagesValid.Take(maxSuggestCombo).ToList();
+            response.ToSuccessResponse(result, "Lấy đề xuất thành công");
+
+            return response;
+        }
+
+        public async Task<ApiResponse<List<ResponseSuggestPackageModel>>> SuggestComboLogicV3Log(Account deliver, List<Package> packagesNotComplete)
+        {
+            ApiResponse<List<ResponseSuggestPackageModel>> response = new();
+            #region Verify params
+            Route? route = await _routeRepo.FirstOrDefaultAsync(
+                    predicate: (rou) => rou.InfoUserId == deliver!.InfoUser!.Id && rou.IsActive == true);
+            int spacingValid = _configUserRepo.GetPackageDistance(deliver.InfoUser.Id);
+            string directionSuggest = _configUserRepo.GetDirectionSuggest(deliver.InfoUser.Id);
+            #endregion
+            #region Get route points deliver
+            List<RoutePoint> routePointsOrigin = await _routePointRepo.GetAllAsync(predicate:
+                (routePoint) => route == null ? false : routePoint.RouteId == route.Id && routePoint.IsVitual == false);
+            List<RoutePoint> routePointVirtual = await _routePointRepo.GetAllAsync(predicate:
+                (routePoint) => route == null ? false : routePoint.RouteId == route.Id && routePoint.IsVitual == true);
+            if (directionSuggest == DirectionTypeConstant.FORWARD)
+            {
+                routePointsOrigin = routePointsOrigin.Where(routePoint => routePoint.DirectionType == DirectionTypeConstant.FORWARD)
+                        .OrderBy(source => source.Index).ToList();
+            }
+            else if (directionSuggest == DirectionTypeConstant.BACKWARD)
+            {
+                routePointsOrigin = routePointsOrigin.Where(routePoint => routePoint.DirectionType == DirectionTypeConstant.BACKWARD)
+                        .OrderBy(source => source.Index).ToList();
+            }
+            #endregion
+            #region Includale package
+            Func<IQueryable<Package>, IIncludableQueryable<Package, object>> include = (source) => source.Include(p => p.Products);
+            #endregion
+            #region Predicate package
+            Expression<Func<Package, bool>> predicate = (source) => source.Status == PackageStatus.APPROVED && source.SenderId != deliver.Id;
+            #endregion
+
+            #region Find packages valid spacing
+            List<ResponseSuggestPackageModel> packagesValid;
+            if (route == null)
+            {
+                packagesValid = _packageRepo.GetAllAsync(include: include, predicate: predicate).Result
+                    .Select(p => p.ToResponseSuggestModel()).ToList();
+            }
+            else
+            {
+                packagesValid = new();
+                List<Package> packages = (await _packageRepo.GetAllAsync(include: include, predicate: predicate)).ToList();
+                int packageCount = packages.Count;
+
+                _logger.LogInformation($"Số lượng gói hàng đã được duyệt: {packageCount}" +
+                    $"\nĐộ dài lộ trình gốc: {Math.Round(route.GetDistanceSuggest(suggestDirection: directionSuggest) / 1000, 2)}km" +
+                    $"\nĐiểm đi: {route.FromName}\nĐiểm đến: {route.ToName}" +
+                    $"\nKhoảng cách tối đa cho phép: {spacingValid / 1000}km");
+
+                for (int i = 0; i < packageCount; i++)
+                {
+                    _logger.LogInformation($"{i}. =============================");
+                    _logger.LogInformation($"Mã gói hàng: {packages[i].Id}");
+                    _logger.LogInformation($"Điểm lấy hàng: {packages[i].StartAddress}");
+                    _logger.LogInformation($"Điểm giao hàng: {packages[i].DestinationAddress}");
+
+                    PackageDistanceValid packageDistanceValid = MapHelper.IsTrueWithPackageAndUserRouteV2(
+                        directionSuggest, routePointsOrigin, route, packages[i], spacingValid * 0.6);
+                    string textResultRoute = packageDistanceValid.IsValid ? "Hợp lệ" : "Không hợp lệ";
+                    _logger.LogInformation($"Kiểm tra hướng và khoảng cách của gói hàng đường chim bay: {textResultRoute}");
+                    _logger.LogInformation($"Khoảng cách điểm bắt đầu của gói hàng với lộ trình: {Math.Round(packageDistanceValid.StartPointMinDistance / 1000, 2)}km");
+                    _logger.LogInformation($"Khoảng cách điểm kết thúc của gói hàng với lộ trình: {Math.Round(packageDistanceValid.EndPointMinDistance / 1000, 2)}km");
+                    if (packageDistanceValid.IsValid)
+                    {
+                        List<Package> allPackageWillOrder = new List<Package>(packagesNotComplete);
+                        allPackageWillOrder.Add(packages[i]);
+                        List<GeoCoordinate> listPoints = SuggestPackageHelper.GetListPointOrder(directionSuggest, allPackageWillOrder, route);
+                        DirectionApiModel requestModel = DirectionApiModel.FromListGeoCoordinate(listPoints);
+                        List<ResponsePolyLineModel> listPolyline = await _mapboxService.GetPolyLine(requestModel);
+                        _logger.LogInformation($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance / 1000)}km");
                         if (listPolyline.Count > 0)
                         {
                             if (directionSuggest == DirectionTypeConstant.FORWARD)
