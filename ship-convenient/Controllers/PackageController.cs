@@ -24,11 +24,11 @@ namespace ship_convenient.Controllers
         [HttpGet]
         [SwaggerOperation(Summary = "Get list package")]
         [ProducesResponseType(typeof(ApiResponsePaginated<ResponsePackageModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetList(Guid? deliverId, Guid? senderId, string? status, int pageIndex = 0, int pageSize = 20)
+        public async Task<IActionResult> GetList(Guid? deliverId, Guid? senderId,string? id, string? status, int pageIndex = 0, int pageSize = 20)
         {
             try
             {
-                ApiResponsePaginated<ResponsePackageModel> response = await _packageService.GetFilter(deliverId, senderId, status, pageIndex, pageSize);
+                ApiResponsePaginated<ResponsePackageModel> response = await _packageService.GetFilter(deliverId, senderId,id, status, pageIndex, pageSize);
                 return SendResponse(response);
             }
             catch (Exception ex)

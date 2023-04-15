@@ -10,7 +10,7 @@ namespace ship_convenient.Services.PackageService
     {
         Task<ApiResponse<ResponsePackageModel>> Create(CreatePackageModel model);
         Task<ApiResponse<ResponsePackageModel>> GetById(Guid id);
-        Task<ApiResponsePaginated<ResponsePackageModel>> GetFilter(Guid? deliverId, Guid? senderId, string? status, int pageIndex, int pageSize);
+        Task<ApiResponsePaginated<ResponsePackageModel>> GetFilter(Guid? deliverId, Guid? senderId,string? id, string? status, int pageIndex, int pageSize);
         Task<ApiResponse<List<ResponsePackageModel>>> GetAll(Guid deliverId, Guid senderId, string? status);
         Task<ApiResponse> ApprovedPackage(Guid id, bool isNotify = true);
         Task<ApiResponse> RejectPackage(Guid id);
@@ -19,7 +19,7 @@ namespace ship_convenient.Services.PackageService
         Task<ApiResponse> DeliverCancelPackage(Guid packageId, string? reason);
         Task<ApiResponse> PickupPackageFailed(PickupPackageFailedModel model, bool isScript = false);
         Task<ApiResponse> PickupPackageSuccess(Guid packageId);
-        Task<ApiResponse> DeliveredSuccess(Guid packageId, bool isScript = false);
+        Task<ApiResponse> DeliveredSuccess(Guid packageId, bool isScript = false); 
         Task<ApiResponse> ToSuccessPackage(Guid packageId);
         Task<ApiResponse> DeliveredFailed(DeliveredFailedModel packageId, bool isScript = false);
         Task<ApiResponse> ReportProblem(CreateReportPackageModel model);

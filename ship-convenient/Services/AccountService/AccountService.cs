@@ -8,6 +8,7 @@ using ship_convenient.Core.Repository;
 using ship_convenient.Core.UnitOfWork;
 using ship_convenient.Entities;
 using ship_convenient.Helper.SuggestPackageHelper;
+using ship_convenient.Model.GoongModel;
 using ship_convenient.Model.UserModel;
 using ship_convenient.Services.GenericService;
 using System.Linq.Expressions;
@@ -250,6 +251,38 @@ namespace ship_convenient.Services.AccountService
             {
                 response.ToFailedResponse("Không tìm thấy lộ trình ảo");
             }
+            return response;
+        }
+
+        public async Task<ApiResponse<List<ResponseSearchModel>>> GetHistoryLocation(Guid senderId)
+        {
+            ApiResponse<List<ResponseSearchModel>> response = new();
+            List<Package> packages = await _packageRepo.GetAllAsync(
+                predicate: p => p.SenderId == senderId);
+            List<ResponseSearchModel> result = new();
+            for (int i = 0; i < packages.Count; i++)
+            {
+                Package package = packages[i];
+                ResponseSearchModel startPoint = new ResponseSearchModel();
+                startPoint.Name = package.StartAddress;
+                startPoint.Longitude = package.StartLongitude;
+                startPoint.Latitude = package.StartLatitude;
+
+                if (!result.Any(location => location.Name == startPoint.Name)) {
+                    result.Add(startPoint);
+                }
+
+                ResponseSearchModel endPoint = new ResponseSearchModel();
+                endPoint.Name = package.DestinationAddress;
+                endPoint.Longitude = package.DestinationLongitude;
+                endPoint.Latitude = package.DestinationLatitude;
+
+                if (!result.Any(location => location.Name == endPoint.Name))
+                {
+                    result.Add(endPoint);
+                }
+            }
+            response.ToSuccessResponse(result, "Lấy thông tin thành công");
             return response;
         }
     }

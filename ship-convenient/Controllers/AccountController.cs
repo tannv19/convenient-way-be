@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ship_convenient.Core.CoreModel;
+using ship_convenient.Model.GoongModel;
 using ship_convenient.Model.UserModel;
 using ship_convenient.Services.AccountService;
 using ship_convenient.Services.SendSmsService;
@@ -162,8 +163,24 @@ namespace ship_convenient.Controllers
             }
         }
 
-        
 
-        
+        [HttpGet("history-location")]
+        [SwaggerOperation(Summary = "Get history location")]
+        [ProducesResponseType(typeof(ApiResponse<List<ResponseSearchModel>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> HistoryLocation(Guid senderId)
+        {
+            try
+            {
+                ApiResponse<List<ResponseSearchModel>> response = await _accountService.GetHistoryLocation(senderId);
+                return SendResponse(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get history locaiton : " + ex.Message.Substring(0, 300));
+                return BadRequest(ex);
+            }
+        }
+
+
     }
 }
