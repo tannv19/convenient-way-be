@@ -38,14 +38,6 @@ namespace ship_convenient.Services.FirebaseCloudMsgService
             Console.WriteLine($"Response firebase notification: {response}");
             if (!string.IsNullOrEmpty(responseFirebase))
             {
-                Notification notification = new Notification()
-                {
-                    AccountId = model.AccountId,
-                    Title = model.Title,
-                    Content = model.Body,
-                    TypeOfNotification = model.TypeOfNotification
-                };
-                await _notificationRepo.InsertAsync(notification);
                 response.ToSuccessResponse($"Gửi thông báo thành công - {responseFirebase}");
             }
             else {
