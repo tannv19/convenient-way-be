@@ -46,7 +46,7 @@ namespace ship_convenient.Services.DatabaseService
             double minLatitude = 10.77371671523056;
             double maxLatitude = 10.843294269787952;
 
-            /*List<string> avatarsLink = new List<string>();
+            List<string> avatarsLink = new List<string>();
             avatarsLink.Add("https://cdn-icons-png.flaticon.com/512/4333/4333609.png");
             avatarsLink.Add("https://cdn-icons-png.flaticon.com/512/2202/2202112.png");
             avatarsLink.Add("https://cdn-icons-png.flaticon.com/512/4140/4140047.png");
@@ -78,7 +78,7 @@ namespace ship_convenient.Services.DatabaseService
               .RuleFor(u => u.ToLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
               .RuleFor(u => u.ToLatitude, faker => faker.Random.Double(min: minLatitude, max: maxLatitude));
 
-            List<Account> accounts = FakerAccount.Generate(10);
+          /*  List<Account> accounts = FakerAccount.Generate(10);
             for (int i = 0; i < accounts.Count; i++)
             {
                 InfoUser infoUser = FakerInfoUser.Generate();
@@ -103,6 +103,17 @@ namespace ship_convenient.Services.DatabaseService
                 Balance = 0
             };
 
+            Account staff = new Account
+            {
+                UserName = "staff",
+                Password = "staff",
+                Role = RoleName.STAFF,
+                Status = AccountStatus.ACTIVE,
+                Balance = 0
+            };
+            staff.InfoUser = FakerInfoUser.Generate();
+
+            await _accountRepo.InsertAsync(staff);
             await _accountRepo.InsertAsync(admin);
             await _accountRepo.InsertAsync(adminBalance);
             // await _accountRepo.InsertAsync(accounts);

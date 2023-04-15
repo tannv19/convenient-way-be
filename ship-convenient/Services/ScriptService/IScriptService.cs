@@ -4,12 +4,12 @@ namespace ship_convenient.Services.ScriptService
 {
     public interface IScriptService
     {
-        Task<ApiResponse> CreateActiveAccount();
-        Task<ApiResponse> CreatePackages();
-        Task<ApiResponse> ApprovedPackages();
-        Task<ApiResponse> SelectedPackages();
-        Task<ApiResponse> PickupPackages();
-        Task<ApiResponse> DeliveredPackages();
+        Task<ApiResponse> CreateActiveAccount(int deliverCount, int senderCount);
+        Task<ApiResponse> CreatePackages(int packageCount);
+        Task<ApiResponse> ApprovedPackages(int packageCount);
+        Task<ApiResponse> SelectedPackages(int selectedSuccess);
+        Task<ApiResponse> PickupPackages(int pickupSuccess, int pickupFailed);
+        Task<ApiResponse> DeliveredPackages(int deliveredSuccess, int deliveredFailed);
         Task<ApiResponse> RemoveScriptData();
     }
 }

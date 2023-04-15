@@ -17,11 +17,11 @@ namespace ship_convenient.Services.PackageService
         Task<ApiResponse> DeliverSelectedPackages(Guid deliverId, List<Guid> packageIds, bool isScript = false);
         Task<ApiResponse> SenderCancelPackage(Guid packageId, string? reason);
         Task<ApiResponse> DeliverCancelPackage(Guid packageId, string? reason);
-        Task<ApiResponse> PickupPackageFailed(PickupPackageFailedModel model);
+        Task<ApiResponse> PickupPackageFailed(PickupPackageFailedModel model, bool isScript = false);
         Task<ApiResponse> PickupPackageSuccess(Guid packageId);
-        Task<ApiResponse> DeliveredSuccess(Guid packageId);
+        Task<ApiResponse> DeliveredSuccess(Guid packageId, bool isScript = false);
         Task<ApiResponse> ToSuccessPackage(Guid packageId);
-        Task<ApiResponse> DeliveredFailed(DeliveredFailedModel packageId);
+        Task<ApiResponse> DeliveredFailed(DeliveredFailedModel packageId, bool isScript = false);
         Task<ApiResponse> ReportProblem(CreateReportPackageModel model);
         Task<ApiResponse> RefundToWarehouseSuccess(Guid packageId);
         Task<ApiResponse> RefundToWarehouseFailed(Guid packageId);

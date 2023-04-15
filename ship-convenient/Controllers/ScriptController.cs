@@ -16,54 +16,54 @@ namespace ship_convenient.Controllers
         [HttpGet("create-active-account")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateActiveAccount()
+        public async Task<IActionResult> CreateActiveAccount(int deliverCount = 20, int senderCount = 10)
         {
-            var response = await _scriptService.CreateActiveAccount();
+            var response = await _scriptService.CreateActiveAccount(deliverCount, senderCount);
             return Ok(response);
         }
 
         [HttpGet("create-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreatePackages()
+        public async Task<IActionResult> CreatePackages(int packageCount = 100)
         {
-            var response = await _scriptService.CreatePackages();
+            var response = await _scriptService.CreatePackages(packageCount);
             return Ok(response);
         }
 
         [HttpGet("approved-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ApprovedPackages()
+        public async Task<IActionResult> ApprovedPackages(int packageCount = 80)
         {
-            var response = await _scriptService.ApprovedPackages();
+            var response = await _scriptService.ApprovedPackages(packageCount);
             return Ok(response);
         }
 
         [HttpGet("selected-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> SelectedPackages()
+        public async Task<IActionResult> SelectedPackages(int packageCount = 60)
         {
-            var response = await _scriptService.SelectedPackages();
+            var response = await _scriptService.SelectedPackages(packageCount);
             return Ok(response);
         }
 
         [HttpGet("pickup-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PickupSuccessPackages()
+        public async Task<IActionResult> PickupSuccessPackages(int pickupSuccess = 50, int pickupFailed = 10)
         {
-            var response = await _scriptService.PickupPackages();
+            var response = await _scriptService.PickupPackages(pickupSuccess, pickupFailed);
             return Ok(response);
         }
 
         [HttpGet("delivered-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeliveredSuccessPackages()
+        public async Task<IActionResult> DeliveredSuccessPackages(int deliveredSuccess = 40, int deliveredFailed = 10)
         {
-            var response = await _scriptService.DeliveredPackages();
+            var response = await _scriptService.DeliveredPackages(deliveredSuccess, deliveredFailed);
             return Ok(response);
         }
 

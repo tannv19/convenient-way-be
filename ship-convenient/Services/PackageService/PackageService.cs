@@ -143,7 +143,7 @@ namespace ship_convenient.Services.PackageService
             return response;
         }
 
-        public async Task<ApiResponse> DeliveredFailed(DeliveredFailedModel model)
+        public async Task<ApiResponse> DeliveredFailed(DeliveredFailedModel model, bool isScript = false)
         {
             ApiResponse response = new ApiResponse();
             Package? package = await _packageRepo.GetByIdAsync(model.PackageId, disableTracking: false,
@@ -224,7 +224,7 @@ namespace ship_convenient.Services.PackageService
             #endregion
 
             int result = await _unitOfWork.CompleteAsync();
-            if (result > 0)
+            if (result > 0 && !isScript)
             {
                 #region Send notification to sender
                 if (sender != null && !string.IsNullOrEmpty(sender.RegistrationToken))
@@ -692,7 +692,7 @@ namespace ship_convenient.Services.PackageService
             return response;
         }
 
-        public async Task<ApiResponse> DeliveredSuccess(Guid packageId)
+        public async Task<ApiResponse> DeliveredSuccess(Guid packageId, bool isScript = false)
         {
             ApiResponse response = new ApiResponse();
             decimal profitPercent = decimal.Parse(_configRepo.GetValueConfig(ConfigConstant.PROFIT_PERCENTAGE)) / 100;
@@ -774,7 +774,7 @@ namespace ship_convenient.Services.PackageService
             #endregion
             int result = await _unitOfWork.CompleteAsync();
 
-            if (result > 0)
+            if (result > 0 && !isScript)
             {
                 #region create virtual route
                 await _packageUtils.ReloadVirtualRoute(package.DeliverId.Value);
@@ -1569,7 +1569,7 @@ namespace ship_convenient.Services.PackageService
             return resposne;
         }
 
-        public async Task<ApiResponse> PickupPackageFailed(PickupPackageFailedModel model)
+        public async Task<ApiResponse> PickupPackageFailed(PickupPackageFailedModel model, bool isScript = false)
         {
             ApiResponse response = new ApiResponse();
 
@@ -1648,7 +1648,7 @@ namespace ship_convenient.Services.PackageService
             await _notificationRepo.InsertAsync(notification);
             #endregion
             int result = await _unitOfWork.CompleteAsync();
-            if (result > 0)
+            if (result > 0 && !isScript)
             {
                 response.ToSuccessResponse("Lấy hàng thất bại");
                 if (sender != null && !string.IsNullOrEmpty(sender.RegistrationToken))
