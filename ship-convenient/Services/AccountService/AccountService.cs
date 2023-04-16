@@ -141,8 +141,9 @@ namespace ship_convenient.Services.AccountService
             }
             if (!string.IsNullOrEmpty(role))
             {
-                Expression<Func<Account, bool>> predicateStatus = (ac) => ac.Role == role.ToUpper();
-                predicates.Add(predicateStatus);
+                string[] roles = role.Split(",");
+                Expression<Func<Account, bool>> predicateRoles = (ac) => roles.Contains(ac.Role);
+                predicates.Add(predicateRoles);
             }
             #endregion
             #region Order
