@@ -355,13 +355,14 @@ namespace ship_convenient.Services.PackageService
             #endregion
 
             #region Order
-            // Func<IQueryable<Package>, IOrderedQueryable<Package>> orderBy = (source) => source.OrderByDescending(p => p.ModifiedAt);
+            Func<IQueryable<Package>, IOrderedQueryable<Package>> orderBy = (source) => source.OrderBy(p => p.CreatedAt);
             #endregion
 
             Expression<Func<Package, ResponsePackageModel>> selector = (package) => package.ToResponseModel();
             PaginatedList<ResponsePackageModel> items;
             items = await _packageRepo.GetPagedListAsync(
                  selector: selector, include: include, predicates: predicates,
+                 orderBy: orderBy,
                   pageIndex: pageIndex, pageSize: pageSize);
             _logger.LogInformation("Total count: " + items.TotalCount);
             #region Response result
