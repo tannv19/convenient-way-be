@@ -25,7 +25,7 @@ namespace ship_convenient.Controllers
         [HttpGet("create-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreatePackages(int packageCount = 100)
+        public async Task<IActionResult> CreatePackages(int packageCount = 50)
         {
             var response = await _scriptService.CreatePackages(packageCount);
             return Ok(response);
@@ -34,16 +34,16 @@ namespace ship_convenient.Controllers
         [HttpGet("approved-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ApprovedPackages(int packageCount = 80)
+        public async Task<IActionResult> ApprovedPackages(int packageCountApproved = 40, int packageCountReject = 10)
         {
-            var response = await _scriptService.ApprovedPackages(packageCount);
+            var response = await _scriptService.ApprovedPackages(packageCountApproved, packageCountReject);
             return Ok(response);
         }
 
         [HttpGet("selected-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> SelectedPackages(int packageCount = 60)
+        public async Task<IActionResult> SelectedPackages(int packageCount = 30)
         {
             var response = await _scriptService.SelectedPackages(packageCount);
             return Ok(response);
@@ -52,7 +52,7 @@ namespace ship_convenient.Controllers
         [HttpGet("pickup-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PickupSuccessPackages(int pickupSuccess = 50, int pickupFailed = 10)
+        public async Task<IActionResult> PickupSuccessPackages(int pickupSuccess = 24, int pickupFailed = 6)
         {
             var response = await _scriptService.PickupPackages(pickupSuccess, pickupFailed);
             return Ok(response);
@@ -61,7 +61,7 @@ namespace ship_convenient.Controllers
         [HttpGet("delivered-packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeliveredSuccessPackages(int deliveredSuccess = 40, int deliveredFailed = 10)
+        public async Task<IActionResult> DeliveredSuccessPackages(int deliveredSuccess = 20, int deliveredFailed = 4)
         {
             var response = await _scriptService.DeliveredPackages(deliveredSuccess, deliveredFailed);
             return Ok(response);

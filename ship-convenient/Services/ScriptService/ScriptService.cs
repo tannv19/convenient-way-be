@@ -8,6 +8,9 @@ using ship_convenient.Model.PackageModel;
 using ship_convenient.Services.GenericService;
 using ship_convenient.Services.PackageService;
 using unitofwork_core.Constant.Package;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Route = ship_convenient.Entities.Route;
 
 namespace ship_convenient.Services.ScriptService
@@ -26,43 +29,66 @@ namespace ship_convenient.Services.ScriptService
             this._packageService = packageService;
         }
        
-        public async Task<ApiResponse> CreatePackages()
+        public async Task<ApiResponse> CreatePackages(int packageCount)
         {
             ApiResponse response = new();
             List<Account> scriptSenders = await _accountRepo.GetAllAsync(
                 predicate: acc => acc.UserName.Contains(MarkScript));
             List<Guid> senderIds = scriptSenders.Select(a => a.Id).ToList();
+            
             Faker<Package> FakerPackage = new Faker<Package>()
-               .RuleFor(o => o.StartAddress, faker => faker.Address.FullAddress() + MarkScript)
-               .RuleFor(o => o.StartLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
-               .RuleFor(o => o.StartLatitude, faker => faker.Random.Double(min: minLatitude, max: maxLatitude))
-               .RuleFor(o => o.DestinationAddress, faker => faker.Address.FullAddress())
-               .RuleFor(o => o.DestinationLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
-               .RuleFor(o => o.DestinationLatitude, faker => faker.Random.Double(min: minLatitude, max: maxLatitude))
+               .RuleFor(o => o.StartAddress, faker => faker.PickRandom(DataScript.RandomLocationsName()) + MarkScript)
+               /*.RuleFor(o => o.StartLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
+               .RuleFor(o => o.StartLatitude, faker => faker.Random.Double(min: minLatitude, max: maxLatitude))*/
+               .RuleFor(o => o.DestinationAddress, faker => faker.PickRandom(DataScript.RandomLocationsName()))
+               /*.RuleFor(o => o.DestinationLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
+               .RuleFor(o => o.DestinationLatitude, faker => faker.Random.Double(min: minLatitude, max: maxLatitude))*/
                .RuleFor(o => o.Distance, faker => faker.Random.Double(min: 2.5, max: 20))
-               .RuleFor(o => o.PickupName, faker => faker.Person.FullName)
-               .RuleFor(o => o.PickupPhone, faker => faker.Person.Phone)
-               .RuleFor(o => o.ReceiverName, faker => faker.Person.FullName)
-               .RuleFor(o => o.ReceiverPhone, faker => faker.Person.Phone)
+               .RuleFor(o => o.PickupName, faker => faker.PickRandom(DataScript.RandomLastName()) + " " + faker.PickRandom(DataScript.RandomFirstName()))
+               .RuleFor(o => o.PickupPhone, faker => faker.PickRandom(DataScript.RandomPhone()))
+               .RuleFor(o => o.PickupTimeStart, faker => new DateTime(year: 1, month: 1, day: 1, hour: 7, minute: 0, second: 0))
+               .RuleFor(o => o.PickupTimeOver, faker => new DateTime(year: 1, month: 1, day: 1, hour: 11, minute: 0, second: 0))
+               .RuleFor(o => o.ReceiverName, faker => faker.PickRandom(DataScript.RandomLastName()) +  " "+ faker.PickRandom(DataScript.RandomFirstName()))
+               .RuleFor(o => o.ReceiverPhone, faker => faker.PickRandom(DataScript.RandomPhone()))
+               .RuleFor(o => o.DeliveryTimeStart, faker => new DateTime(year: 1, month: 1, day: 1, hour: 15, minute: 0, second: 0))
+               .RuleFor(o => o.DeliveryTimeOver, faker => new DateTime(year: 1, month: 1, day: 1, hour: 19, minute: 0, second: 0))
                .RuleFor(o => o.Height, faker => faker.Random.Double(min: 0.2, max: 0.8))
                .RuleFor(o => o.Width, faker => faker.Random.Double(min: 0.2, max: 0.8))
                .RuleFor(o => o.Length, faker => faker.Random.Double(min: 0.2, max: 0.8))
                .RuleFor(o => o.Weight, faker => faker.Random.Int(5, 20))
                .RuleFor(o => o.PhotoUrl, faker => faker.Image.ToString())
                .RuleFor(o => o.Note, faker => faker.Lorem.Sentence(6))
-               .RuleFor(o => o.PriceShip, faker => faker.Random.Int(min: 10, max: 40) * 1000)
+               .RuleFor(o => o.PriceShip, faker => 16000)
                .RuleFor(o => o.Status, faker => PackageStatus.WAITING)
                .RuleFor(o => o.SenderId, faker => faker.PickRandom(senderIds));
-            List<Package> packages = FakerPackage.Generate(100);
+            List<Package> packages = FakerPackage.Generate(packageCount);
             for (int i = 0; i < packages.Count; i++)
             {
+                Location startLocation = DataScript.GetLocationFromName(packages[i].StartAddress);
+                Location endLocation = DataScript.GetLocationFromName(packages[i].DestinationAddress);
+                packages[i].StartLongitude = startLocation.Longitude;
+                packages[i].StartLatitude = startLocation.Latitude;
+                packages[i].DestinationLongitude = endLocation.Longitude;
+                packages[i].DestinationLatitude = endLocation.Latitude;
+                packages[i].PickupTimeStart = new DateTime(year: 1, month: 1, day: 1, hour: 7, minute: 0, second: 0);
+                packages[i].PickupTimeOver = new DateTime(year: 1, month: 1, day: 1, hour: 11, minute: 0, second: 0);
+                packages[i].DeliveryTimeStart = new DateTime(year: 1, month: 1, day: 1, hour: 15, minute: 0, second: 0);
+                packages[i].DeliveryTimeOver = new DateTime(year: 1, month: 1, day: 1, hour: 19, minute: 0, second: 0);
+
                 Faker<Product> FakerProduct = new Faker<Product>()
-                       .RuleFor(p => p.Name, faker => string.Join(" ", faker.Lorem.Words()))
+                       .RuleFor(p => p.Name, faker => faker.PickRandom(DataScript.RandomProduct()))
                        .RuleFor(p => p.Price, faker => faker.Random.Int(20, 150) * 1000)
                        .RuleFor(p => p.Description, faker => faker.Lorem.Sentence(1));
                 List<Product> products = FakerProduct.Generate(2);
                 packages[i].Products = products;
             }
+            packages[4].StartAddress = "Intel Products Vietnam, Hi-Tech Park, Lô I2, Đ. D1, Phường Tân Phú, Quận 9, Thành phố Hồ Chí Minh, Việt Nam" + MarkScript;
+            packages[4].StartLongitude = 10.853597234309197;
+            packages[4].StartLatitude = 106.7968103042961;
+            packages[4].DestinationAddress = "844E, Xa Lộ Hà Nội, Khu Phố 3, Phường Hiệp Phú, Quận 9, Thành Phố Hồ Chí Minh, Phường Linh Trung, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam";
+            packages[4].DestinationLatitude = 10.855087924011565;
+            packages[4].DestinationLongitude = 106.78203504282008;
+
             await _packageRepo.InsertAsync(packages);
             await _unitOfWork.CompleteAsync();
             string log = "";
@@ -70,15 +96,8 @@ namespace ship_convenient.Services.ScriptService
             {
                 log += i + ". "+ packages[i].Id.ToString() + "\n";
             }
-            response.ToSuccessResponse("Đã tạo 100 gói hàng\n" + log);
+            response.ToSuccessResponse($"Đã tạo {packageCount} gói hàng\n" + log);
             return response;
-        }
-
-        public Task<ApiResponse> DeliveredPackages()
-        {
-            throw new NotImplementedException();
-
-
         }
 
         public async Task<ApiResponse> PickupPackages()
@@ -156,7 +175,7 @@ namespace ship_convenient.Services.ScriptService
 
             ConfigUser configIsActive = new ConfigUser();
             configIsActive.Name = DefaultUserConfigConstant.IS_ACTIVE;
-            configIsActive.Value = "TRUE";
+            configIsActive.Value = "FALSE";
             configIsActive.InfoUser = infoUser;
 
             infoUser.ConfigUsers.Add(configWarningPrice);
@@ -168,12 +187,10 @@ namespace ship_convenient.Services.ScriptService
         public async Task<ApiResponse> RemoveScriptData()
         {
             ApiResponse response = new();
-            List<Account> accounts = _unitOfWork.Accounts.GetAll(predicate: a => a.UserName.Contains(MarkScript)).ToList();
-            _unitOfWork.Accounts.DeleteRange(accounts);
-
             List<Package> packages = _unitOfWork.Packages.GetAll(predicate: p => p.StartAddress.Contains(MarkScript));
             _unitOfWork.Packages.DeleteRange(packages);
-
+            List<Account> accounts = _unitOfWork.Accounts.GetAll(predicate: a => a.UserName.Contains(MarkScript)).ToList();
+            _unitOfWork.Accounts.DeleteRange(accounts);
             await _unitOfWork.CompleteAsync();
             response.ToSuccessResponse("Đã xóa dữ liệu script");
             return response;
@@ -207,8 +224,8 @@ namespace ship_convenient.Services.ScriptService
             .RuleFor(u => u.Status, faker => "ACTIVE");
             Faker<InfoUser> FakerInfoUser = new Faker<InfoUser>()
                  .RuleFor(u => u.Email, faker => faker.Person.Email)
-                .RuleFor(u => u.FirstName, faker => faker.Person.FirstName)
-                .RuleFor(u => u.LastName, faker => faker.Person.LastName)
+                .RuleFor(u => u.FirstName, faker => faker.PickRandom(DataScript.RandomFirstName()))
+                .RuleFor(u => u.LastName, faker => faker.PickRandom(DataScript.RandomLastName()))
                 .RuleFor(u => u.PhotoUrl, faker => faker.PickRandom(avatarsLink))
                 .RuleFor(u => u.Gender, faker => faker.PickRandom(AccountGender.GetAll()))
                 .RuleFor(u => u.Latitude, faker => faker.Random.Double(minLatitude, maxLatitude))
@@ -245,67 +262,26 @@ namespace ship_convenient.Services.ScriptService
             return response;
         }
 
-        public async Task<ApiResponse> CreatePackages(int packageCount)
-        {
-            ApiResponse response = new();
-            List<Account> scriptSenders = await _accountRepo.GetAllAsync(
-                predicate: acc => acc.UserName.Contains(MarkScript));
-            List<Guid> senderIds = scriptSenders.Select(a => a.Id).ToList();
-            Faker<Package> FakerPackage = new Faker<Package>()
-               .RuleFor(o => o.StartAddress, faker => faker.Address.FullAddress() + MarkScript)
-               .RuleFor(o => o.StartLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
-               .RuleFor(o => o.StartLatitude, faker => faker.Random.Double(min: minLatitude, max: maxLatitude))
-               .RuleFor(o => o.DestinationAddress, faker => faker.Address.FullAddress())
-               .RuleFor(o => o.DestinationLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
-               .RuleFor(o => o.DestinationLatitude, faker => faker.Random.Double(min: minLatitude, max: maxLatitude))
-               .RuleFor(o => o.Distance, faker => faker.Random.Double(min: 2.5, max: 20))
-               .RuleFor(o => o.PickupName, faker => faker.Person.FullName)
-               .RuleFor(o => o.PickupPhone, faker => faker.Person.Phone)
-               .RuleFor(o => o.ReceiverName, faker => faker.Person.FullName)
-               .RuleFor(o => o.ReceiverPhone, faker => faker.Person.Phone)
-               .RuleFor(o => o.Height, faker => faker.Random.Double(min: 0.2, max: 0.8))
-               .RuleFor(o => o.Width, faker => faker.Random.Double(min: 0.2, max: 0.8))
-               .RuleFor(o => o.Length, faker => faker.Random.Double(min: 0.2, max: 0.8))
-               .RuleFor(o => o.Weight, faker => faker.Random.Int(5, 20))
-               .RuleFor(o => o.PhotoUrl, faker => faker.Image.ToString())
-               .RuleFor(o => o.Note, faker => faker.Lorem.Sentence(6))
-               .RuleFor(o => o.PriceShip, faker => faker.Random.Int(min: 10, max: 40) * 1000)
-               .RuleFor(o => o.Status, faker => PackageStatus.WAITING)
-               .RuleFor(o => o.SenderId, faker => faker.PickRandom(senderIds));
-            List<Package> packages = FakerPackage.Generate(packageCount);
-            for (int i = 0; i < packages.Count; i++)
-            {
-                Faker<Product> FakerProduct = new Faker<Product>()
-                       .RuleFor(p => p.Name, faker => string.Join(" ", faker.Lorem.Words()))
-                       .RuleFor(p => p.Price, faker => faker.Random.Int(20, 150) * 1000)
-                       .RuleFor(p => p.Description, faker => faker.Lorem.Sentence(1));
-                List<Product> products = FakerProduct.Generate(2);
-                packages[i].Products = products;
-            }
-            await _packageRepo.InsertAsync(packages);
-            await _unitOfWork.CompleteAsync();
-            string log = "";
-            for (int i = 0; i < packages.Count; i++)
-            {
-                log += i + ". " + packages[i].Id.ToString() + "\n";
-            }
-            response.ToSuccessResponse("Đã tạo 100 gói hàng\n" + log);
-            return response;
-        }
-
-        public async Task<ApiResponse> ApprovedPackages(int packageCount)
+        public async Task<ApiResponse> ApprovedPackages(int packageCountAppproved, int packageCountReject)
         {
             ApiResponse response = new ApiResponse();
             List<Package> packages = _unitOfWork.Packages.GetAll(predicate: p => p.StartAddress.Contains(MarkScript));
             int indexPackage = 0;
-            string log = "";
-            for (int i = 0; i < packageCount; i++)
+            string log = $"{packageCountAppproved} gói hàng đã được duyệt\n";
+            for (int i = 0; i < packageCountAppproved; i++)
             {
-                await _packageService.ApprovedPackage(packages[i].Id, isNotify: false);
-                log += $"{indexPackage}. {packages[i].Id} đã được duyệt";
+                await _packageService.ApprovedPackage(packages[i].Id, isNotify: true);
+                log += $"{indexPackage}. {packages[i].Id}\n";
                 indexPackage++;
             }
-            response.ToSuccessResponse($"{indexPackage} gói hàng đã được duyệt\n {log}");
+            log += $"{packageCountReject} gói hàng đã bị từ chối\n";
+            for (int i = 0; i < packageCountReject; i++)
+            {
+                await _packageService.RejectPackage(packages[i + packageCountAppproved].Id);
+                log += $"{indexPackage}. {packages[i + packageCountAppproved].Id}\n";
+                indexPackage++;
+            }
+            response.ToSuccessResponse($"{packages.Count} đang chờ duyệt\n {log}");
             return response;
         }
 
@@ -313,15 +289,16 @@ namespace ship_convenient.Services.ScriptService
         {
             ApiResponse response = new();
             List<Account> deliverScript = _accountRepo.GetAll(
-              predicate: acc => acc.UserName.Contains(MarkScript) && acc.Role == RoleName.DELIVER);
-            List<Package> packagesScript = _packageRepo.GetAll(
-                predicate: p => p.StartAddress.Contains(MarkScript));
+              predicate: acc => acc.UserName.Contains(MarkScript) && acc.Role == RoleName.DELIVER,
+              include: source => source.Include(acc => acc.InfoUser));
+            List <Package> packagesScript = _packageRepo.GetAll(
+                predicate: p => p.StartAddress.Contains(MarkScript) && p.Status == PackageStatus.APPROVED);
             List<Package> packageSuccess = packagesScript.Skip(0).Take(selectedSuccess).ToList();
             int indexLog = 0;
             string logSelected = "";
             for (int i = 0; i < deliverScript.Count; i++)
             {
-                List<Package> packageForDeliver = packagesScript.Skip(i * 3).Take(3).ToList();
+                List<Package> packageForDeliver = packageSuccess.Skip(i * 3).Take(3).ToList();
                 List<Guid> packageIds = packageForDeliver.Select(p => p.Id).ToList();
                 for (int j = 0; j < packageForDeliver.Count; j++)
                 {
@@ -330,7 +307,7 @@ namespace ship_convenient.Services.ScriptService
                 }
                 await _packageService.DeliverSelectedPackages(deliverScript[i].Id, packageIds, isScript: true);
             }
-            response.ToSuccessResponse($"{indexLog} gói hàng đã được nhận\n" + logSelected);
+            response.ToSuccessResponse($"{indexLog} gói hàng đang chờ nhận\n" + logSelected);
             return response;
         }
 

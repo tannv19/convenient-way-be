@@ -367,10 +367,11 @@ namespace ship_convenient.Services.PackageService
                 List<Package> packages = (await _packageRepo.GetAllAsync(include: include, predicate: predicate)).ToList();
                 int packageCount = packages.Count;
 
-                _logger.LogInformation($"Số lượng gói hàng đã được duyệt: {packageCount}" +
-                    $"\nĐộ dài lộ trình gốc: {Math.Round(route.GetDistanceSuggest(suggestDirection: directionSuggest) / 1000,2)}km" +
-                    $"\nĐiểm đi: {route.FromName}\nĐiểm đến: {route.ToName}" +
-                    $"\nKhoảng cách tối đa cho phép: {spacingValid / 1000}km");
+                _logger.LogInformation($"AccountId : {deliver.Id}" +
+                    $"== Số lượng gói hàng đã được duyệt: {packageCount}" +
+                    $"== Độ dài lộ trình gốc: {Math.Round(route.GetDistanceSuggest(suggestDirection: directionSuggest) / 1000,2)}km" +
+                    $"== Điểm đi: {route.FromName}\nĐiểm đến: {route.ToName}" +
+                    $"== Khoảng cách tối đa cho phép: {spacingValid / 1000}km");
                 
                 for (int i = 0; i < packageCount; i++)
                 {
