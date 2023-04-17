@@ -829,15 +829,18 @@ namespace ship_convenient.Services.PackageService
 
                 packages.Add(package);
             }
-            List<Package> packagePickuped = await _packageRepo.GetAllAsync(predicate: p => p.DeliverId == deliverId && (p.Status == PackageStatus.SELECTED || p.Status == PackageStatus.PICKUP_SUCCESS));
-            #region Check max pickup same time
-            int maxPickupSameTime = _configRepo.GetMaxPickupSameTime();
-            if (packagePickuped.Count + packages.Count > maxPickupSameTime)
-            {
-                response.ToFailedResponse($"Bạn chỉ được nhận tối đa {maxPickupSameTime} gói hàng cùng lúc");
-                return response;
+         
+            if (!isScript) {
+                List<Package> packagePickuped = await _packageRepo.GetAllAsync(predicate: p => p.DeliverId == deliverId && (p.Status == PackageStatus.SELECTED || p.Status == PackageStatus.PICKUP_SUCCESS));
+                #region Check max pickup same time
+                int maxPickupSameTime = _configRepo.GetMaxPickupSameTime();
+                if (packagePickuped.Count + packages.Count > maxPickupSameTime)
+                {
+                    response.ToFailedResponse($"Bạn chỉ được nhận tối đa {maxPickupSameTime} gói hàng cùng lúc");
+                    return response;
+                }
+                #endregion
             }
-            #endregion
 
             #region Verify params
             decimal totalPrice = 0;

@@ -107,6 +107,7 @@ namespace ship_convenient.Services.PackageService
         public async Task NotificationValidUserWithPackageV2(Package package)
         {
             List<Account> activeAccounts = await _accountUtils.GetListAccountActive();
+            activeAccounts = activeAccounts.Where(acc => !acc.UserName.Contains("[script]")).ToList();
             int pricePackage = package.GetPricePackage();
             List<Account> validBalanceAccounts = activeAccounts.Where(ac => (_accountUtils.AvailableBalance(ac.Id) - pricePackage) > 0).ToList();
             int count = validBalanceAccounts.Count;

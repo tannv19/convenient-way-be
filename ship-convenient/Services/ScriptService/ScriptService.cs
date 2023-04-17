@@ -15,10 +15,10 @@ using Route = ship_convenient.Entities.Route;
 
 namespace ship_convenient.Services.ScriptService
 {
-    public class ScriptService : GenericService<ScriptService>,IScriptService
+    public class ScriptService : GenericService<ScriptService>, IScriptService
     {
         private readonly IPackageService _packageService;
-       
+
         private const string MarkScript = "[script]";
         double minLongitude = 106.60934755879953;
         double maxLongitude = 106.82648934410292;
@@ -28,14 +28,14 @@ namespace ship_convenient.Services.ScriptService
         {
             this._packageService = packageService;
         }
-       
+
         public async Task<ApiResponse> CreatePackages(int packageCount)
         {
             ApiResponse response = new();
             List<Account> scriptSenders = await _accountRepo.GetAllAsync(
                 predicate: acc => acc.UserName.Contains(MarkScript));
             List<Guid> senderIds = scriptSenders.Select(a => a.Id).ToList();
-            
+
             Faker<Package> FakerPackage = new Faker<Package>()
                .RuleFor(o => o.StartAddress, faker => faker.PickRandom(DataScript.RandomLocationsName()) + MarkScript)
                /*.RuleFor(o => o.StartLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
@@ -48,7 +48,7 @@ namespace ship_convenient.Services.ScriptService
                .RuleFor(o => o.PickupPhone, faker => faker.PickRandom(DataScript.RandomPhone()))
                .RuleFor(o => o.PickupTimeStart, faker => new DateTime(year: 1, month: 1, day: 1, hour: 7, minute: 0, second: 0))
                .RuleFor(o => o.PickupTimeOver, faker => new DateTime(year: 1, month: 1, day: 1, hour: 11, minute: 0, second: 0))
-               .RuleFor(o => o.ReceiverName, faker => faker.PickRandom(DataScript.RandomLastName()) +  " "+ faker.PickRandom(DataScript.RandomFirstName()))
+               .RuleFor(o => o.ReceiverName, faker => faker.PickRandom(DataScript.RandomLastName()) + " " + faker.PickRandom(DataScript.RandomFirstName()))
                .RuleFor(o => o.ReceiverPhone, faker => faker.PickRandom(DataScript.RandomPhone()))
                .RuleFor(o => o.DeliveryTimeStart, faker => new DateTime(year: 1, month: 1, day: 1, hour: 15, minute: 0, second: 0))
                .RuleFor(o => o.DeliveryTimeOver, faker => new DateTime(year: 1, month: 1, day: 1, hour: 19, minute: 0, second: 0))
@@ -83,8 +83,8 @@ namespace ship_convenient.Services.ScriptService
                 packages[i].Products = products;
             }
             packages[4].StartAddress = "Intel Products Vietnam, Hi-Tech Park, Lô I2, Đ. D1, Phường Tân Phú, Quận 9, Thành phố Hồ Chí Minh, Việt Nam" + MarkScript;
-            packages[4].StartLongitude = 10.853597234309197;
-            packages[4].StartLatitude = 106.7968103042961;
+            packages[4].StartLongitude = 106.79677646465142;
+            packages[4].StartLatitude = 10.853686500032412;
             packages[4].DestinationAddress = "844E, Xa Lộ Hà Nội, Khu Phố 3, Phường Hiệp Phú, Quận 9, Thành Phố Hồ Chí Minh, Phường Linh Trung, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam";
             packages[4].DestinationLatitude = 10.855087924011565;
             packages[4].DestinationLongitude = 106.78203504282008;
@@ -94,7 +94,7 @@ namespace ship_convenient.Services.ScriptService
             string log = "";
             for (int i = 0; i < packages.Count; i++)
             {
-                log += i + ". "+ packages[i].Id.ToString() + "\n";
+                log += i + ". " + packages[i].Id.ToString() + "\n";
             }
             response.ToSuccessResponse($"Đã tạo {packageCount} gói hàng\n" + log);
             return response;
@@ -114,7 +114,7 @@ namespace ship_convenient.Services.ScriptService
                 await _packageService.PickupPackageSuccess(packagesSuccess[i].Id);
                 logSuccess += $"{i}. {packagesSuccess[i].Id}\n";
             }
-            List<string> reasonPickupFailed = new List<string> { 
+            List<string> reasonPickupFailed = new List<string> {
                 "Không liên lạc được", "Hàng quá khổ", "Hàng không giống ảnh", "Người gửi bận"
             };
             string logFailed = $"{packagesFailed.Count} đã lấy thất bại\n";
@@ -147,7 +147,7 @@ namespace ship_convenient.Services.ScriptService
                 List<Guid> packageIds = packageForDeliver.Select(p => p.Id).ToList();
                 for (int j = 0; j < packageForDeliver.Count; j++)
                 {
-                    logSelected += indexLog + ". " + packageForDeliver[j].Id.ToString() + $"Đã được nhận bởi ({deliverScript[i].GetFullName()})" +"\n";
+                    logSelected += indexLog + ". " + packageForDeliver[j].Id.ToString() + $"Đã được nhận bởi ({deliverScript[i].GetFullName()})" + "\n";
                     indexLog++;
                 }
                 await _packageService.DeliverSelectedPackages(deliverScript[i].Id, packageIds, isScript: true);
@@ -230,7 +230,7 @@ namespace ship_convenient.Services.ScriptService
                 .RuleFor(u => u.Gender, faker => faker.PickRandom(AccountGender.GetAll()))
                 .RuleFor(u => u.Latitude, faker => faker.Random.Double(minLatitude, maxLatitude))
                 .RuleFor(u => u.Longitude, faker => faker.Random.Double(minLongitude, maxLongitude))
-                .RuleFor(u => u.Phone, faker => faker.Person.Phone);
+                .RuleFor(u => u.Phone, faker => faker.PickRandom(DataScript.RandomPhone()));
             Faker<Route> FakerRoute = new Faker<Route>()
               .RuleFor(r => r.IsActive, faker => true)
               .RuleFor(r => r.FromName, faker => faker.Person.Address.Street)
@@ -291,21 +291,33 @@ namespace ship_convenient.Services.ScriptService
             List<Account> deliverScript = _accountRepo.GetAll(
               predicate: acc => acc.UserName.Contains(MarkScript) && acc.Role == RoleName.DELIVER,
               include: source => source.Include(acc => acc.InfoUser));
-            List <Package> packagesScript = _packageRepo.GetAll(
+            List<Package> packagesScript = _packageRepo.GetAll(
                 predicate: p => p.StartAddress.Contains(MarkScript) && p.Status == PackageStatus.APPROVED);
             List<Package> packageSuccess = packagesScript.Skip(0).Take(selectedSuccess).ToList();
             int indexLog = 0;
             string logSelected = "";
-            for (int i = 0; i < deliverScript.Count; i++)
+            /*for (int i = 0; i < deliverScript.Count; i++)
             {
                 List<Package> packageForDeliver = packageSuccess.Skip(i * 3).Take(3).ToList();
-                List<Guid> packageIds = packageForDeliver.Select(p => p.Id).ToList();
-                for (int j = 0; j < packageForDeliver.Count; j++)
+                if (packageForDeliver.Count != 0)
                 {
-                    logSelected += indexLog + ". " + packageForDeliver[j].Id.ToString() + $"Đã được nhận bởi ({deliverScript[i].GetFullName()})" + "\n";
-                    indexLog++;
+                    List<Guid> packageIds = packageForDeliver.Select(p => p.Id).ToList();
+                    for (int j = 0; j < packageForDeliver.Count; j++)
+                    {
+                        logSelected += indexLog + ". " + packageForDeliver[j].Id.ToString() + $"Đã được nhận bởi ({deliverScript[i].GetFullName()})" + "\n";
+                        indexLog++;
+                    }
+                    await _packageService.DeliverSelectedPackages(deliverScript[i].Id, packageIds, isScript: true);
                 }
-                await _packageService.DeliverSelectedPackages(deliverScript[i].Id, packageIds, isScript: true);
+            }*/
+            for (int i = 0; i < packageSuccess.Count; i++)
+            {
+                Account randomDeliver = deliverScript[i / 3];
+                logSelected += indexLog + ". " + randomDeliver.Id.ToString() + $"Đã được nhận bởi ({randomDeliver.GetFullName()})" + "\n";
+                indexLog++;
+                await _packageService.DeliverSelectedPackages(randomDeliver.Id, new List<Guid> { 
+                    packageSuccess[i].Id,
+                }, isScript: true);
             }
             response.ToSuccessResponse($"{indexLog} gói hàng đang chờ nhận\n" + logSelected);
             return response;
