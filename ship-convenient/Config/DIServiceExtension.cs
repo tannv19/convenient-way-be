@@ -51,6 +51,7 @@ namespace ship_convenient.Config
             services.AddScoped<PackageUtils>();
             services.AddScoped<AccountUtils>();  
             services.AddScoped<PackageSuggestService>();
+            services.AddScoped<IPackageServiceScript, PackageServiceScript>();
         }
     }
 }
