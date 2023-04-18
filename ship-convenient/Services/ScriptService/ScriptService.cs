@@ -375,5 +375,27 @@ namespace ship_convenient.Services.ScriptService
             response.ToSuccessResponse(logTotal);
             return response;
         }
+
+        public async Task<ApiResponse> CompletePackegs(int completeSuccess)
+        {
+            ApiResponse response = new();
+            List<Package> packagesScript = _packageRepo.GetAll(
+                predicate: p => p.StartAddress.Contains(MarkScript) && p.Status == PackageStatus.DELIVERED_SUCCESS,
+                disableTracking: false);
+            List<Package> packageSuccess = packagesScript.Skip(0).Take(completeSuccess).ToList();
+            int indexLog = 0;
+            string logSelected = "";
+            for (int i = 0; i < packageSuccess.Count; i++)
+            {
+                logSelected += indexLog + ". " + packageSuccess[i].Id + $"Đã hoàn tất" + "\n";
+                indexLog++;
+                /* await _packageService.DeliverSelectedPackages(randomDeliver.Id, new List<Guid> { 
+                     packageSuccess[i].Id,
+                 }, isScript: true);*/
+                await _packageService.ToSuccessPackage(packageSuccess[i].Id);
+            }
+            response.ToSuccessResponse($"{indexLog} gói hàng đang chờ hoàn tất\n" + logSelected);
+            return response;
+        }
     }
 }

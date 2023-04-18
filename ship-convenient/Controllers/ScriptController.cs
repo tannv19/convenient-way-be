@@ -67,6 +67,15 @@ namespace ship_convenient.Controllers
             return Ok(response);
         }
 
+        [HttpGet("complete-packages")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CompletePackages(int packageCompleteCount = 20)
+        {
+            var response = await _scriptService.CompletePackegs(packageCompleteCount);
+            return Ok(response);
+        }
+
         [HttpGet("remove-script-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

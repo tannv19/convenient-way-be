@@ -10,6 +10,7 @@ namespace ship_convenient.Services.ScriptService
         Task<ApiResponse> SelectedPackages(int selectedSuccess);
         Task<ApiResponse> PickupPackages(int pickupSuccess, int pickupFailed);
         Task<ApiResponse> DeliveredPackages(int deliveredSuccess, int deliveredFailed);
+        Task<ApiResponse> CompletePackegs(int completeSuccess);
         Task<ApiResponse> RemoveScriptData();
     }
 }
