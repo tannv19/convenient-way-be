@@ -100,5 +100,15 @@ namespace ship_convenient.Core.Repository
             }
             return "";
         }
+
+        public int GetGapTimeSuggest()
+        {
+            ConfigApp? configApp = _dbSet.FirstOrDefault(con => con.Name.Equals(ConfigConstant.GAP_TIME_SUGGEST));
+            if (configApp != null)
+            {
+                return int.Parse(configApp.Note);
+            }
+            throw new ArgumentNullException("Không tìm thấy thông tin cấu hình");
+        }
     }
 }

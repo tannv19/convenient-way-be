@@ -219,6 +219,12 @@ namespace ship_convenient.Services.DatabaseService
                 Note = "2",
                 ModifiedBy = admin.Id
             };
+            ConfigApp spaceTimeSuggest = new ConfigApp
+            {
+                Name = ConfigConstant.SPACE_TIME_SUGGEST,
+                Note = "60",
+                ModifiedBy = admin.Id
+            };
             List<ConfigApp> configApps = new List<ConfigApp> {
                 configProfit, configMinimumDistance, configMaxPickupSameTime, configMaxCreateRoute, configBalanceDefault, configMaxSuggestCombo, configMaxCancelInDay
             };

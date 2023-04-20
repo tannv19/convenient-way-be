@@ -13,5 +13,6 @@
         public const string MAX_SUGGEST_COMBO = "MAX_SUGGEST_COMBO";
 
         public const string MAX_CANCEL_IN_DAY = "MAX_CANCEL_IN_DAY";
+        public const string GAP_TIME_SUGGEST = "GAP_TIME_SUGGEST";
     }
 }

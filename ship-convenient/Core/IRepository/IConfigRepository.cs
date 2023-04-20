@@ -13,5 +13,6 @@ namespace ship_convenient.Core.IRepository
         int GetDefaultBalanceNewAccount();
         int GetMaxSuggestCombo();
         int GetMaxCancelInDay();
+        int GetGapTimeSuggest();
     }
 }

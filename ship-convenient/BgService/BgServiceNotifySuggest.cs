@@ -30,7 +30,10 @@ namespace ship_convenient.BgService
                     PackageUtils _packageUtils = scope.ServiceProvider.GetRequiredService<PackageUtils>();
                     IFirebaseCloudMsgService _fcmService = scope.ServiceProvider.GetRequiredService<IFirebaseCloudMsgService>();
                     await SuggestNotificationProcess(_fcmService, _unitOfWork, _packageService, _packageUtils);
-                    await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);
+                    if (DateTime.UtcNow.Minute == 0) {
+                        await SuggestNotificationProcess(_fcmService, _unitOfWork, _packageService, _packageUtils);
+                        await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);
+                    }
                 }
 
             }
@@ -39,19 +42,22 @@ namespace ship_convenient.BgService
         public async Task SuggestNotificationProcess(
             IFirebaseCloudMsgService fcmService, IUnitOfWork unitOfWork, IPackageService packageService, PackageUtils packageUtils)
         {
+            if (DateTime.Now.Minute == 0) {
 
-            IPackageRepository packageRepo = unitOfWork.Packages;
-            List<Package> approvedPackage = await packageRepo.GetAllAsync(
-                predicate: item => item.Status == PackageStatus.APPROVED);
-
-            for (int i = 0; i < approvedPackage.Count; i++)
-            {
-                try {
-                    await packageUtils.NotificationValidUserWithPackageV2(approvedPackage[i]);
-                }
-                catch (Exception e)
+                IPackageRepository packageRepo = unitOfWork.Packages;
+                List<Package> approvedPackage = await packageRepo.GetAllAsync(
+                    predicate: item => item.Status == PackageStatus.APPROVED);
+                _logger.LogInformation($"Số lượng gói hàng đã được duyệt {approvedPackage.Count}");
+                for (int i = 0; i < approvedPackage.Count; i++)
                 {
-                    _logger.LogError(e, "Error when send notification to user suggest");
+                    try
+                    {
+                        await packageUtils.NotificationValidUserWithPackageV2(approvedPackage[i]);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Error when send notification to user suggest");
+                    }
                 }
             }
 

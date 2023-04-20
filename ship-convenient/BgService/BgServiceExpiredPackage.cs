@@ -49,7 +49,7 @@ namespace ship_convenient.BgService
                 predicate: pk => pk.Status == PackageStatus.APPROVED || pk.Status == PackageStatus.WAITING,
                 include: source => source.Include(pk => pk.Sender));
             packageStatusValid = packageStatusValid.Where(
-                item => Utils.CompareEqualTimeDate(item.ExpiredTime.ToUniversalTime(), DateTime.UtcNow)).ToList();
+                item => Utils.CompareEqualTimeHour(item.ExpiredTime.ToUniversalTime(), DateTime.UtcNow)).ToList();
             _logger.LogInformation("Số lượng gói hàng cần phải tự hủy: {count}", packageStatusValid.Count);
             foreach (Package package in packageStatusValid)
             {
