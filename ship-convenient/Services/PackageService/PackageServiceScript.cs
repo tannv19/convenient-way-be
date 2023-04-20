@@ -390,14 +390,6 @@ namespace ship_convenient.Services.PackageService
             package.Status = PackageStatus.PICKUP_FAILED;
             await _transactionPackageRepo.InsertAsync(history);
             #endregion
-            #region Create notification to sender
-            Notification notification = new Notification();
-            notification.Title = "Lấy hàng thất bại";
-            notification.Content = $"Người giao không thể lấy được kiện hàng của bạn, kiện hàng sẽ bị hủy";
-            notification.TypeOfNotification = TypeOfNotification.PICKUP_FAILED;
-            notification.AccountId = package.SenderId;
-            await _notificationRepo.InsertAsync(notification);
-            #endregion
             int result = await _unitOfWork.CompleteAsync();
             if (result > 0)
             {

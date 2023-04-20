@@ -1,11 +1,13 @@
 ﻿using Bogus;
 using ship_convenient.Constants.AccountConstant;
+using ship_convenient.Constants.ConfigConstant;
 using ship_convenient.Core.IRepository;
 using ship_convenient.Core.Repository;
 using ship_convenient.Core.UnitOfWork;
 using ship_convenient.Entities;
 using unitofwork_core.Constant.ConfigConstant;
 using unitofwork_core.Constant.Package;
+using unitofwork_core.Constant.Transaction;
 using Route = ship_convenient.Entities.Route;
 
 namespace ship_convenient.Services.DatabaseService
@@ -18,6 +20,7 @@ namespace ship_convenient.Services.DatabaseService
         private readonly IAccountRepository _accountRepo;
         private readonly IInfoUserRepository _infoUserRepo;
         private readonly IPackageRepository _packageRepo;
+        private readonly ITransactionRepository _transactionRepo;
         private readonly IConfigRepository _configRepo;
         public DatabaseService(ILogger<DatabaseService> logger, IUnitOfWork unitOfWork)
         {
@@ -27,6 +30,8 @@ namespace ship_convenient.Services.DatabaseService
             _packageRepo = unitOfWork.Packages;
             _accountRepo = unitOfWork.Accounts;
             _configRepo = unitOfWork.Configs;
+            _transactionRepo = unitOfWork.Transactions;
+
             _infoUserRepo = unitOfWork.InfoUsers;
         }
         public void RemoveData()
@@ -78,13 +83,13 @@ namespace ship_convenient.Services.DatabaseService
               .RuleFor(u => u.ToLongitude, faker => faker.Random.Double(min: minLongitude, max: maxLongitude))
               .RuleFor(u => u.ToLatitude, faker => faker.Random.Double(min: minLatitude, max: maxLatitude));
 
-          /*  List<Account> accounts = FakerAccount.Generate(10);
-            for (int i = 0; i < accounts.Count; i++)
-            {
-                InfoUser infoUser = FakerInfoUser.Generate();
-                infoUser.Routes.Add(FakerRoute.Generate());
-                accounts[i].InfoUser = infoUser;
-            }*/
+            /*  List<Account> accounts = FakerAccount.Generate(10);
+              for (int i = 0; i < accounts.Count; i++)
+              {
+                  InfoUser infoUser = FakerInfoUser.Generate();
+                  infoUser.Routes.Add(FakerRoute.Generate());
+                  accounts[i].InfoUser = infoUser;
+              }*/
             Account admin = new Account
             {
                 UserName = "admin",
@@ -112,11 +117,57 @@ namespace ship_convenient.Services.DatabaseService
                 Balance = 0
             };
             staff.InfoUser = FakerInfoUser.Generate();
+            staff.InfoUser.FirstName = "Hưng";
+            staff.InfoUser.LastName = "Nguyễn";
+           
 
             await _accountRepo.InsertAsync(staff);
             await _accountRepo.InsertAsync(admin);
             await _accountRepo.InsertAsync(adminBalance);
             // await _accountRepo.InsertAsync(accounts);
+
+            Account datlltAccount = FakerAccount.Generate();
+            datlltAccount.UserName = "datltt";
+            datlltAccount.Password = "123456";
+            datlltAccount.Role = RoleName.SENDER;
+            datlltAccount.Status = AccountStatus.ACTIVE;
+            datlltAccount.Balance = 500000;
+            datlltAccount.InfoUser = FakerInfoUser.Generate();
+            datlltAccount.InfoUser.FirstName = "Đạt";
+            datlltAccount.InfoUser.LastName = "Lê";
+            datlltAccount.InfoUser.Phone = "0283572923";
+
+            Account tannvAcccount = FakerAccount.Generate();
+            tannvAcccount.UserName = "tannvv";
+            tannvAcccount.Password = "123456";
+            tannvAcccount.Role = RoleName.DELIVER;
+            tannvAcccount.Status = AccountStatus.ACTIVE;
+            tannvAcccount.Balance = 500000;
+            tannvAcccount.InfoUser = FakerInfoUser.Generate();
+            tannvAcccount.InfoUser.FirstName = "Tân";
+            tannvAcccount.InfoUser.LastName = "Nguyễn";
+            tannvAcccount.InfoUser.Phone = "0384616791";
+            CreateDefaultConfig(tannvAcccount.InfoUser);
+
+            await _accountRepo.InsertAsync(tannvAcccount);
+            await _accountRepo.InsertAsync(datlltAccount);
+
+            Transaction transactionDatlt = new Transaction();
+            transactionDatlt.AccountId = datlltAccount.Id;
+            transactionDatlt.CoinExchange = 500000;
+            transactionDatlt.TransactionType = TransactionType.INCREASE;
+            transactionDatlt.Status = TransactionStatus.ACCOMPLISHED;
+            transactionDatlt.BalanceWallet = 500000;
+
+            Transaction transactionTan = new Transaction();
+            transactionTan.AccountId = tannvAcccount.Id;
+            transactionTan.CoinExchange = 500000;
+            transactionTan.TransactionType = TransactionType.INCREASE;
+            transactionTan.Status = TransactionStatus.ACCOMPLISHED;
+            transactionTan.BalanceWallet = 500000;
+
+            await _transactionRepo.InsertAsync(transactionDatlt);
+            await _transactionRepo.InsertAsync(transactionTan);
 
 
 
@@ -126,12 +177,12 @@ namespace ship_convenient.Services.DatabaseService
                 Note = "20",
                 ModifiedBy = admin.Id
             };
-            ConfigApp configProfitRefund = new ConfigApp
+            /*ConfigApp configProfitRefund = new ConfigApp
             {
                 Name = ConfigConstant.PROFIT_PERCENTAGE_REFUND,
                 Note = "50",
                 ModifiedBy = admin.Id
-            };
+            };*/
             ConfigApp configMinimumDistance = new ConfigApp
             {
                 Name = ConfigConstant.MINIMUM_DISTANCE,
@@ -169,7 +220,7 @@ namespace ship_convenient.Services.DatabaseService
                 ModifiedBy = admin.Id
             };
             List<ConfigApp> configApps = new List<ConfigApp> {
-                configProfit, configProfitRefund, configMinimumDistance, configMaxPickupSameTime, configMaxCreateRoute, configBalanceDefault, configMaxSuggestCombo, configMaxCancelInDay
+                configProfit, configMinimumDistance, configMaxPickupSameTime, configMaxCreateRoute, configBalanceDefault, configMaxSuggestCombo, configMaxCancelInDay
             };
             await _configRepo.InsertAsync(configApps);
 
@@ -236,5 +287,35 @@ namespace ship_convenient.Services.DatabaseService
 
             _unitOfWork.Complete();
         }
+
+        public void CreateDefaultConfig(InfoUser infoUser)
+        {
+            ConfigUser configPackageDistance = new ConfigUser();
+            configPackageDistance.Name = DefaultUserConfigConstant.PACKAGE_DISTANCE;
+            configPackageDistance.Value = DefaultUserConfigConstant.DEFAULT_PACKAGE_DISTANCE_VALUE;
+            configPackageDistance.InfoUser = infoUser;
+
+            ConfigUser configWarningPrice = new ConfigUser();
+            configWarningPrice.Name = DefaultUserConfigConstant.WARNING_PRICE;
+            configWarningPrice.Value = DefaultUserConfigConstant.DEFAULT_WARNING_PRICE_VALUE;
+            configWarningPrice.InfoUser = infoUser;
+
+            ConfigUser configDirectionSuggest = new ConfigUser();
+            configDirectionSuggest.Name = DefaultUserConfigConstant.DIRECTION_SUGGEST;
+            configDirectionSuggest.Value = "FORWARD";
+            configDirectionSuggest.InfoUser = infoUser;
+
+            ConfigUser configIsActive = new ConfigUser();
+            configIsActive.Name = DefaultUserConfigConstant.IS_ACTIVE;
+            configIsActive.Value = "TRUE";
+            configIsActive.InfoUser = infoUser;
+
+            infoUser.ConfigUsers.Add(configWarningPrice);
+            infoUser.ConfigUsers.Add(configPackageDistance);
+            infoUser.ConfigUsers.Add(configDirectionSuggest);
+            infoUser.ConfigUsers.Add(configIsActive);
+        }
     }
+
+
 }

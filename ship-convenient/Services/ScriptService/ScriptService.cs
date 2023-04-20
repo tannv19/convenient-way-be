@@ -195,13 +195,13 @@ namespace ship_convenient.Services.ScriptService
                 .RuleFor(u => u.UserName, faker => faker.Person.UserName + MarkScript)
                 .RuleFor(u => u.Password, faker => faker.Person.FirstName.ToLower())
                 .RuleFor(u => u.Role, faker => RoleName.DELIVER)
-                .RuleFor(u => u.Balance, faker => 50000000)
+                .RuleFor(u => u.Balance, faker => 5000000)
                 .RuleFor(u => u.Status, faker => "ACTIVE");
             Faker<Account> FakerAccountSender = new Faker<Account>()
             .RuleFor(u => u.UserName, faker => faker.Person.UserName + MarkScript)
             .RuleFor(u => u.Password, faker => faker.Person.FirstName.ToLower())
             .RuleFor(u => u.Role, faker => RoleName.SENDER)
-            .RuleFor(u => u.Balance, faker => 50000000)
+            .RuleFor(u => u.Balance, faker => 5000000)
             .RuleFor(u => u.Status, faker => "ACTIVE");
             Faker<InfoUser> FakerInfoUser = new Faker<InfoUser>()
                  .RuleFor(u => u.Email, faker => faker.Person.Email)
