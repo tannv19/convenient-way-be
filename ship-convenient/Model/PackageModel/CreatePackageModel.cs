@@ -63,11 +63,11 @@ namespace unitofwork_core.Model.PackageModel
             entity.PhotoUrl = this.PhotoUrl;
             entity.Note = this.Note;
             entity.SenderId = this.SenderId;
-            entity.PickupTimeStart = this.PickupTimeStart;
-            entity.PickupTimeOver = this.PickupTimeOver;
-            entity.DeliveryTimeStart = this.DeliveryTimeStart;
-            entity.DeliveryTimeOver = this.DeliveryTimeOver;
-            entity.ExpiredTime = this.ExpiredTime;
+            entity.PickupTimeStart = this.PickupTimeStart.ToUniversalTime();
+            entity.PickupTimeOver = this.PickupTimeOver.ToUniversalTime();
+            entity.DeliveryTimeStart = this.DeliveryTimeStart.ToUniversalTime();
+            entity.DeliveryTimeOver = this.DeliveryTimeOver.ToUniversalTime();
+            entity.ExpiredTime = this.ExpiredTime.ToUniversalTime();
 
             int productCount = this.Products.Count;
             for (int i = 0; i < productCount; i++)
