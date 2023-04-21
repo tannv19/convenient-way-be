@@ -30,7 +30,8 @@ namespace ship_convenient.BgService
                     IUnitOfWork _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     IPackageService _packageService = scope.ServiceProvider.GetRequiredService<IPackageService>();
                     IConfigRepository _configRepository = _unitOfWork.Configs;
-                    int suggestTime = _configRepository.GetGapTimeSuggest();
+                    // int suggestTime = _configRepository.GetGapTimeSuggest();
+                    int suggestTime = 60;
                     await ToSuccessPackageProcess(_unitOfWork, _packageService);
                     await Task.Delay(TimeSpan.FromSeconds(suggestTime), stoppingToken);
                 }

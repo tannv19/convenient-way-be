@@ -221,7 +221,7 @@ namespace ship_convenient.Services.DatabaseService
             };
             ConfigApp spaceTimeSuggest = new ConfigApp
             {
-                Name = ConfigConstant.SPACE_TIME_SUGGEST,
+                Name = ConfigConstant.GAP_TIME_SUGGEST,
                 Note = "60",
                 ModifiedBy = admin.Id
             };
