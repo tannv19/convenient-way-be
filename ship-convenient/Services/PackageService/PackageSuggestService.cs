@@ -470,6 +470,16 @@ namespace ship_convenient.Services.PackageService
                 routePointsOrigin = routePointsOrigin.Where(routePoint => routePoint.DirectionType == DirectionTypeConstant.BACKWARD)
                         .OrderBy(source => source.Index).ToList();
             }
+            double distanceSuggest = 0;
+            if (directionSuggest == DirectionTypeConstant.FORWARD)
+            {
+                distanceSuggest = route.DistanceForward;
+            } else if (directionSuggest == DirectionTypeConstant.BACKWARD) {
+                distanceSuggest = route.DistanceBackward;
+            } else {
+                distanceSuggest = route.DistanceForward + route.DistanceBackward;
+            }
+            
             #endregion
             #region Includale package
             Func<IQueryable<Package>, IIncludableQueryable<Package, object>> include = (source) => source.Include(p => p.Products);
@@ -516,7 +526,7 @@ namespace ship_convenient.Services.PackageService
                         List<GeoCoordinate> listPoints = SuggestPackageHelper.GetListPointOrder(directionSuggest, allPackageWillOrder, route);
                         DirectionApiModel requestModel = DirectionApiModel.FromListGeoCoordinate(listPoints);
                         List<ResponsePolyLineModel> listPolyline = await _mapboxService.GetPolyLine(requestModel);
-                        _logger.LogInformation($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance / 1000)}km");
+                        _logger.LogInformation($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance / 1000)}km (Chênh lệch {listPolyline[0].Distance / 1000 - distanceSuggest / 1000}km)");
                         if (listPolyline.Count > 0)
                         {
                             if (directionSuggest == DirectionTypeConstant.FORWARD)
