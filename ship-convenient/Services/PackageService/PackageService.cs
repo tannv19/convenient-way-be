@@ -80,6 +80,24 @@ namespace ship_convenient.Services.PackageService
             int result = await _unitOfWork.CompleteAsync();
 
             #region Response result
+            if (result > 0) {
+                #region Send notification to staff
+                List<Account> staffs = await _accountRepo.GetAllAsync(predicate: acc => acc.Role == RoleName.STAFF);
+                for (int i = 0; i < staffs.Count; i++)
+                {
+                    Account staff = staffs[i];
+                    if (!string.IsNullOrEmpty(staff.RegistrationToken)) {
+                        Notification notificationStaff = new Notification();
+                        notificationStaff.Title = "Đơn hàng mới!";
+                        notificationStaff.Content = "Có đơn hàng mới được tạo, bạn hãy vào kiểm tra";
+                        notificationStaff.AccountId = staff.Id;
+                        notificationStaff.TypeOfNotification = TypeOfNotification.NEW_PACKAGE;
+                        await SendNotificationToAccount(_fcmService, notificationStaff);
+                    }
+                }
+             
+                #endregion
+            }
             response.Success = result > 0 ? true : false;
             response.Message = result > 0 ? "Tạo đơn hàng thành công" : "Tạo đơn thất bại";
             response.Data = result > 0 ? package.ToResponseModel() : null;

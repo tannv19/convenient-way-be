@@ -22,5 +22,6 @@
         public const string DELIVERY_TIME = "DELIVERY_TIME";
         public const string REPORT_PENDING = "REPORT_PENDING";
         public const string EXPIRED = "EXPIRED";
+        public const string NEW_PACKAGE = "NEW_PACKAGE";
     }
 }
