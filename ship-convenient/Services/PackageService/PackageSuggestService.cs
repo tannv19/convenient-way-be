@@ -470,14 +470,14 @@ namespace ship_convenient.Services.PackageService
                 routePointsOrigin = routePointsOrigin.Where(routePoint => routePoint.DirectionType == DirectionTypeConstant.BACKWARD)
                         .OrderBy(source => source.Index).ToList();
             }
-            double distanceSuggest = 0;
+            double? distanceSuggest;
             if (directionSuggest == DirectionTypeConstant.FORWARD)
             {
-                distanceSuggest = route.DistanceForward;
+                distanceSuggest = route?.DistanceForward;
             } else if (directionSuggest == DirectionTypeConstant.BACKWARD) {
-                distanceSuggest = route.DistanceBackward;
+                distanceSuggest = route?.DistanceBackward;
             } else {
-                distanceSuggest = route.DistanceForward + route.DistanceBackward;
+                distanceSuggest = route?.DistanceForward + route.DistanceBackward;
             }
             
             #endregion
@@ -526,7 +526,11 @@ namespace ship_convenient.Services.PackageService
                         List<GeoCoordinate> listPoints = SuggestPackageHelper.GetListPointOrder(directionSuggest, allPackageWillOrder, route);
                         DirectionApiModel requestModel = DirectionApiModel.FromListGeoCoordinate(listPoints);
                         List<ResponsePolyLineModel> listPolyline = await _mapboxService.GetPolyLine(requestModel);
-                        _logger.LogInformation($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance / 1000)}km (Chênh lệch {string.Format("{0:F2}", listPolyline[0].Distance / 1000 - distanceSuggest / 1000)}km)");
+                        _logger.LogInformation($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance / 1000)}km (Chênh lệch  {string.Format("{0:F2}", listPolyline[0].Distance / 1000 - distanceSuggest / 1000)}km)");
+           
+                        if (directionSuggest != null) {
+                            _logger.LogInformation($"Chênh lệch  {string.Format("{0:F2}", listPolyline[0].Distance / 1000 - distanceSuggest / 1000)}km");
+                        }
                         if (listPolyline.Count > 0)
                         {
                             if (directionSuggest == DirectionTypeConstant.FORWARD)
