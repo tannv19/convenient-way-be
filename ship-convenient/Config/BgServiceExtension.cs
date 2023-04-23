@@ -9,7 +9,7 @@ namespace ship_convenient.Config
             // services.AddHostedService<BgServiceNotifyTimePickup>();
             services.AddHostedService<BgServiceSuccessPackage>();
             services.AddHostedService<BgServiceExpiredPackage>();
-            // services.AddHostedService<BgServiceNotifySuggest>();
+            services.AddHostedService<BgServiceNotifySuggest>();
         }
     }
 }

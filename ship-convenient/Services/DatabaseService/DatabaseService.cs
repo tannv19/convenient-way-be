@@ -226,7 +226,8 @@ namespace ship_convenient.Services.DatabaseService
                 ModifiedBy = admin.Id
             };
             List<ConfigApp> configApps = new List<ConfigApp> {
-                configProfit, configMinimumDistance, configMaxPickupSameTime, configMaxCreateRoute, configBalanceDefault, configMaxSuggestCombo, configMaxCancelInDay
+                configProfit, configMinimumDistance, configMaxPickupSameTime, configMaxCreateRoute, configBalanceDefault, configMaxSuggestCombo, configMaxCancelInDay,
+                spaceTimeSuggest
             };
             await _configRepo.InsertAsync(configApps);
 
