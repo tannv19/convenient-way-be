@@ -428,9 +428,60 @@ namespace ship_convenient.Services.PackageService
             throw new NotImplementedException();
         }
 
-        public Task<ApiResponse> RefundToWarehouseSuccess(Guid packageId)
+        public async Task<ApiResponse> RefundToWarehouseSuccess(Package package)
         {
-            throw new NotImplementedException();
+            ApiResponse resposne = new ApiResponse();
+            Account? sender = package?.Sender;
+            Account? deliver = package?.Deliver;
+            Account adminBalance = await _accountUtils.GetAdminBalance();
+          
+
+            #region Create transactions
+            Transaction systemTrans = new Transaction();
+            systemTrans.Title = TransactionTitle.RETURN_TO_WAREHOUSE_SUCCESS;
+            systemTrans.Description = $"Kiện hàng đã được hoàn trả về kho";
+            systemTrans.Status = TransactionStatus.ACCOMPLISHED;
+            systemTrans.TransactionType = TransactionType.DECREASE;
+            systemTrans.CoinExchange = -package.PriceShip;
+            systemTrans.BalanceWallet = adminBalance.Balance - package.PriceShip;
+            systemTrans.PackageId = package.Id;
+            systemTrans.AccountId = adminBalance.Id;
+            _logger.LogInformation($"System transaction: {systemTrans.CoinExchange}, Balance: {systemTrans.BalanceWallet}");
+
+            Transaction deliverTrans = new Transaction();
+            deliverTrans.Title = TransactionTitle.DELIVERED_FAILED;
+            deliverTrans.Description = "Đơn hàng được hoàn trả về kho thành công";
+            deliverTrans.Status = TransactionStatus.ACCOMPLISHED;
+            deliverTrans.TransactionType = TransactionType.INCREASE;
+            deliverTrans.CoinExchange = package.PriceShip;
+            deliverTrans.BalanceWallet = deliver.Balance + package.PriceShip;
+            deliverTrans.PackageId = package.Id;
+            deliverTrans.AccountId = deliver.Id;
+            _logger.LogInformation($"Deliver transaction: {deliverTrans.CoinExchange}, Balance: {deliverTrans.BalanceWallet}");
+
+            adminBalance.Balance = systemTrans.BalanceWallet;
+            sender.Balance = deliverTrans.BalanceWallet;
+
+            List<Transaction> transactions = new List<Transaction> {
+                    systemTrans, deliverTrans
+                };
+            await _transactionRepo.InsertAsync(transactions);
+            #endregion
+
+            #region Create history
+            TransactionPackage history = new TransactionPackage();
+            history.FromStatus = package.Status;
+            history.ToStatus = PackageStatus.REFUND_TO_WAREHOUSE_SUCCESS;
+            history.Description = "Kiện hàng đã được hoàn trả về kho trung tâm";
+            history.PackageId = package.Id;
+            package.Status = PackageStatus.REFUND_TO_WAREHOUSE_SUCCESS;
+            await _transactionPackageRepo.InsertAsync(history);
+            #endregion
+
+           
+            int result = await _unitOfWork.CompleteAsync();
+           
+            return resposne;
         }
 
         public async Task<ApiResponse> RejectPackage(Package package)

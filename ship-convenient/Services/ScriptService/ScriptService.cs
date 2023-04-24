@@ -382,7 +382,11 @@ namespace ship_convenient.Services.ScriptService
             List<Package> packagesScript = _packageRepo.GetAll(
                 predicate: p => p.StartAddress.Contains(MarkScript) && p.Status == PackageStatus.DELIVERED_SUCCESS,
                 disableTracking: false);
-            List<Package> packageSuccess = packagesScript.Skip(0).Take(completeSuccess).ToList();
+            List<Package> packagesScriptRefund = _packageRepo.GetAll(
+                predicate: p => p.StartAddress.Contains(MarkScript) && p.Status == PackageStatus.DELIVERED_FAILED,
+                disableTracking: false, include: source => source.Include(p => p.Sender)
+                    .Include(p => p.Deliver));
+            List<Package> packageSuccess = packagesScript.Take(completeSuccess).ToList();
             int indexLog = 0;
             string logSelected = "";
             for (int i = 0; i < packageSuccess.Count; i++)
@@ -393,6 +397,14 @@ namespace ship_convenient.Services.ScriptService
                      packageSuccess[i].Id,
                  }, isScript: true);*/
                 await _packageService.ToSuccessPackage(packageSuccess[i].Id);
+            }
+            logSelected += $"{packagesScriptRefund.Count} được hoàn trả về kho thành công\n";
+            int indexLogRefund = 0;
+            for (int i = 0; i < packagesScriptRefund.Count; i++)
+            {
+                logSelected += indexLogRefund + ". " + packagesScriptRefund[i].Id + $"Đã hoàn trả" + "\n";
+                await _packageServiceScript.RefundToWarehouseSuccess(packagesScriptRefund[i]);
+                indexLogRefund++;
             }
             response.ToSuccessResponse($"{indexLog} gói hàng đang chờ hoàn tất\n" + logSelected);
             return response;
