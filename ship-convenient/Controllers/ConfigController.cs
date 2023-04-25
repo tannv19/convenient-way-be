@@ -17,7 +17,7 @@ namespace ship_convenient.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<List<ConfigApp>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<List<ResponseConfigModel>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
             var result = await _configService.GetAll();

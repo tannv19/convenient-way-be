@@ -1,8 +1,10 @@
-﻿using ship_convenient.Core.CoreModel;
+﻿using ship_convenient.Constants.ConfigConstant;
+using ship_convenient.Core.CoreModel;
 using ship_convenient.Core.UnitOfWork;
 using ship_convenient.Entities;
 using ship_convenient.Model.ConfigModel;
 using ship_convenient.Services.GenericService;
+using unitofwork_core.Constant.ConfigConstant;
 
 namespace ship_convenient.Services.ConfigService
 {
@@ -12,10 +14,19 @@ namespace ship_convenient.Services.ConfigService
         {
         }
 
-        public async Task<ApiResponse<List<ConfigApp>>> GetAll()
+        public async Task<ApiResponse<List<ResponseConfigModel>>> GetAll()
         {
-            ApiResponse<List<ConfigApp>> response = new();
-            response.ToSuccessResponse(await _configRepo.GetAllAsync(), "Lấy thông tin thành công");
+            ApiResponse<List<ResponseConfigModel>> response = new();
+            List<ConfigApp> configDefault = await _configRepo.GetAllAsync(predicate: (c) => c.Type == TypeOfConfig.DEFAULT);
+            List<ConfigApp> configPrice = await _configRepo.GetAllAsync(predicate: (c) => c.Type == TypeOfConfig.PRICE_DISTANCE);
+
+            List<ResponseConfigModel> responseConfigDefault = configDefault.Select((c) => c.ToResponseModel()).ToList();
+            ResponseConfigModel? configCalculateWith = responseConfigDefault.FirstOrDefault(predicate: (c) => c.Name == ConfigConstant.CALCULATE_PRICE_WITH);
+            if (configCalculateWith != null)
+            {
+                configCalculateWith.configsChildren = configPrice.Select((c) => c.ToResponseModel()).ToList();
+            }
+            response.ToSuccessResponse(responseConfigDefault, "Lấy thông tin thành công");
             return response;
         }
 

@@ -225,6 +225,48 @@ namespace ship_convenient.Services.DatabaseService
                 Note = "60",
                 ModifiedBy = admin.Id
             };
+
+            #region config price
+            ConfigApp configPriceWith = new ConfigApp
+            {
+                Name = ConfigConstant.CALCULATE_PRICE_WITH,
+                Note = "RANGE",
+                ModifiedBy = admin.Id
+            };
+            ConfigApp config1_7km = new ConfigApp
+            {
+                Name = ConfigConstant.KM_1_7,
+                Note = "14000",
+                Type = "PRICE_DISTANCE",
+                ModifiedBy = admin.Id
+            };
+            ConfigApp config8_15km = new ConfigApp
+            {
+                Name = ConfigConstant.KM_8_15,
+                Note = "17000",
+                Type = "PRICE_DISTANCE",
+                ModifiedBy = admin.Id
+            };
+            ConfigApp config16 = new ConfigApp
+            {
+                Name = ConfigConstant.KM_16,
+                Note = "20000",
+                Type = "PRICE_DISTANCE",
+                ModifiedBy = admin.Id
+            };
+            ConfigApp configPricePerKm = new ConfigApp
+            {
+                Name = ConfigConstant.KM_PER,
+                Note = "2000",
+                Type = "PRICE_DISTANCE",
+                ModifiedBy = admin.Id
+            };
+            List<ConfigApp> configAppPrices = new List<ConfigApp> {
+                configPriceWith, config1_7km, config8_15km, config16, configPricePerKm
+            };
+            await _configRepo.InsertAsync(configAppPrices);
+            #endregion
+
             List<ConfigApp> configApps = new List<ConfigApp> {
                 configProfit, configMinimumDistance, configMaxPickupSameTime, configMaxCreateRoute, configBalanceDefault, configMaxSuggestCombo, configMaxCancelInDay,
                 spaceTimeSuggest

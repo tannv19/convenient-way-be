@@ -6,7 +6,7 @@ namespace ship_convenient.Services.ConfigService
 {
     public interface IConfigService
     {
-        Task<ApiResponse<List<ConfigApp>>> GetAll();
+        Task<ApiResponse<List<ResponseConfigModel>>> GetAll();
         Task<ApiResponse<ConfigApp>> Update(UpdateConfigModel model);
     }
 }
