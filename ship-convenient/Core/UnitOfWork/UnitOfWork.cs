@@ -36,6 +36,7 @@ namespace ship_convenient.Core.UnitOfWork
 
         public IConfigUserRepository ConfigUsers { get; private set; }
         public IRoutePointRepository RoutePoints { get; private set; }
+        public IConfigPriceRepository ConfigPrices { get; private set; }
         public UnitOfWork(AppDbContext context, ILogger<UnitOfWork> logger)
         {
             _context = context;
@@ -56,6 +57,7 @@ namespace ship_convenient.Core.UnitOfWork
             Reports = new ReportRepository(context, logger);
             ConfigUsers = new ConfigUserRepository(context, logger);
             RoutePoints = new RoutePointRepository(context, logger);
+            ConfigPrices = new ConfigPriceRepository(context, logger);
         }
 
         public async Task<int> CompleteAsync()

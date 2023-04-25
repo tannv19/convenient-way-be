@@ -31,5 +31,29 @@ namespace ship_convenient.Controllers
             var result = await _configService.Update(model);
             return SendResponse(result);
         }
+
+        [HttpGet("price")]
+        [ProducesResponseType(typeof(ApiResponse<List<ConfigPrice>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAllConfigPrice()
+        {
+            var result = await _configService.GetAllConfigPrice();
+            return SendResponse(result);
+        }
+
+        [HttpPut("price")]
+        [ProducesResponseType(typeof(ApiResponse<ConfigPrice>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateConfigPrice([FromBody] UpdateConfigPriceModel model)
+        {
+            var result = await _configService.UpdateConfigPrice(model);
+            return SendResponse(result);
+        }
+
+        [HttpPost("price")]
+        [ProducesResponseType(typeof(ApiResponse<ConfigPrice>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateConfigPrice([FromBody] CreateConfigPriceModel model)
+        {
+            var result = await _configService.CreateConfigPrice(model);
+            return SendResponse(result);
+        }
     }
 }

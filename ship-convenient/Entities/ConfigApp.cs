@@ -8,6 +8,7 @@ namespace ship_convenient.Entities
         public string Name { get; set; } = string.Empty;
         public string Note { get; set; } = string.Empty;
         public string Type { get; set; } = TypeOfConfig.DEFAULT;
+        public string Description { get; set; } = string.Empty;
         public Guid ModifiedBy { get; set; }
         public DateTime ModifiedAt { get; set; }
 

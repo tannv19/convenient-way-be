@@ -22,6 +22,7 @@ namespace ship_convenient.Core.UnitOfWork
         IReportRepository Reports { get; }
         IConfigUserRepository ConfigUsers { get; }
         IRoutePointRepository RoutePoints { get; }
+        IConfigPriceRepository ConfigPrices { get; }
         Task<int> CompleteAsync();
         int Complete();
     }

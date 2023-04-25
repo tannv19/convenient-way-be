@@ -22,6 +22,7 @@ namespace ship_convenient.Services.DatabaseService
         private readonly IPackageRepository _packageRepo;
         private readonly ITransactionRepository _transactionRepo;
         private readonly IConfigRepository _configRepo;
+        private readonly IConfigPriceRepository _configPriceRepo;
         public DatabaseService(ILogger<DatabaseService> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
@@ -33,6 +34,7 @@ namespace ship_convenient.Services.DatabaseService
             _transactionRepo = unitOfWork.Transactions;
 
             _infoUserRepo = unitOfWork.InfoUsers;
+            _configPriceRepo = unitOfWork.ConfigPrices;
         }
         public void RemoveData()
         {
@@ -272,6 +274,35 @@ namespace ship_convenient.Services.DatabaseService
                 spaceTimeSuggest
             };
             await _configRepo.InsertAsync(configApps);
+
+            ConfigPrice configPrice1 = new ConfigPrice { 
+                Level = 0,
+                Price = 14000,
+                MinDistance = 1,
+                MaxDistance = 7,
+                ModifiedBy = admin.Id
+            };
+            ConfigPrice configPrice2 = new ConfigPrice
+            {
+                Level = 1,
+                Price = 17000,
+                MinDistance = 8,
+                MaxDistance = 15,
+                ModifiedBy = admin.Id
+            };
+            ConfigPrice configPrice3 = new ConfigPrice
+            {
+                Level = 2,
+                Price = 20000,
+                MinDistance = 16,
+                MaxDistance = 999,
+                ModifiedBy = admin.Id
+            };
+
+            List<ConfigPrice> configsPrice = new List<ConfigPrice> {
+                configPrice1, configPrice2, configPrice3
+            };
+            await _configPriceRepo.InsertAsync(configsPrice);
 
             /*Faker<Package> FakerPackage = new Faker<Package>()
                 .RuleFor(o => o.StartAddress, faker => faker.Address.FullAddress())
