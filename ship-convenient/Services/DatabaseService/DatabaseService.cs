@@ -43,6 +43,7 @@ namespace ship_convenient.Services.DatabaseService
             _unitOfWork.Packages.DeleteRange(_packageRepo.GetAll());
             _unitOfWork.InfoUsers.DeleteRange(_infoUserRepo.GetAll());
             _unitOfWork.Accounts.DeleteRange(_accountRepo.GetAll());
+            _unitOfWork.ConfigPrices.DeleteRange(_configPriceRepo.GetAll());
             _unitOfWork.Complete();
         }
 
