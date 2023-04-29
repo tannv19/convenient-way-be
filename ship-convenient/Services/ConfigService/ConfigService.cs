@@ -34,6 +34,55 @@ namespace ship_convenient.Services.ConfigService
             return response;
         }
 
+        public async Task<ApiResponse<List<ConfigPrice>>> CreateList(List<CreateConfigPriceModel> model)
+        {
+            ApiResponse<List<ConfigPrice>> response = new();
+            List<ConfigPrice> configsPrice = model.Select((c) => c.ToEntity()).ToList();
+            await _configPriceRepo.InsertAsync(configsPrice);
+            int result = _unitOfWork.Complete();
+            if (result > 0)
+            {
+                response.ToSuccessResponse(configsPrice, "Thêm mới thành công");
+            }
+            else
+            {
+                response.ToFailedResponse("Thêm mới thất bại");
+            }
+            return response;
+        }
+
+        public async Task<ApiResponse> DeleteConfigPrice(Guid id)
+        {
+            ApiResponse response = new();
+            await _configPriceRepo.DeleteAsync(id);
+            int result = await _unitOfWork.CompleteAsync();
+            if (result > 0)
+            {
+                response.ToSuccessResponse("Xóa cấu hình thành công");
+            }
+            else
+            {
+                response.ToFailedResponse("Có lỗi xảy ra");
+            }
+            return response;
+        }
+
+        public async Task<ApiResponse> DeleteList()
+        {
+            ApiResponse response = new();
+            _configPriceRepo.DeleteRange(_configPriceRepo.GetAll());
+            int result = await _unitOfWork.CompleteAsync();
+            if (result > 0)
+            {
+                response.ToSuccessResponse("Xóa cấu hình thành công");
+            }
+            else
+            {
+                response.ToFailedResponse("Có lỗi xảy ra");
+            }
+            return response;
+        }
+
         public async Task<ApiResponse<List<ResponseConfigModel>>> GetAll()
         {
             ApiResponse<List<ResponseConfigModel>> response = new();

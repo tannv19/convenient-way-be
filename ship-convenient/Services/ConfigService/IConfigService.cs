@@ -11,5 +11,9 @@ namespace ship_convenient.Services.ConfigService
         Task<ApiResponse<List<ConfigPrice>>> GetAllConfigPrice();
         Task<ApiResponse<ConfigPrice>> UpdateConfigPrice(UpdateConfigPriceModel model);
         Task<ApiResponse<ConfigPrice>> CreateConfigPrice(CreateConfigPriceModel model);
+        Task<ApiResponse> DeleteConfigPrice(Guid id);
+
+        Task<ApiResponse<List<ConfigPrice>>> CreateList(List<CreateConfigPriceModel> model);
+        Task<ApiResponse> DeleteList();
     }
 }
