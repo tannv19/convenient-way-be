@@ -15,5 +15,6 @@ namespace ship_convenient.Services.ConfigService
 
         Task<ApiResponse<List<ConfigPrice>>> CreateList(List<CreateConfigPriceModel> model);
         Task<ApiResponse> DeleteList();
+        Task<ApiResponse<List<ConfigPrice>>> ResetPrice(List<CreateConfigPriceModel> model);
     }
 }

@@ -107,6 +107,24 @@ namespace ship_convenient.Services.ConfigService
             return response;
         }
 
+        public async Task<ApiResponse<List<ConfigPrice>>> ResetPrice(List<CreateConfigPriceModel> model)
+        {
+            ApiResponse<List<ConfigPrice>> response = new();
+            List<ConfigPrice> configsPrice = model.Select((c) => c.ToEntity()).ToList();
+            _configPriceRepo.DeleteRange(_configPriceRepo.GetAll());
+            await _configPriceRepo.InsertAsync(configsPrice);
+            int result = _unitOfWork.Complete();
+            if (result > 0)
+            {
+                response.ToSuccessResponse(configsPrice, "Cập nhật thành công");
+            }
+            else
+            {
+                response.ToFailedResponse("Cập nhật thất bại");
+            }
+            return response;
+        }
+
         public async Task<ApiResponse<ConfigApp>> Update(UpdateConfigModel model)
         {
             ApiResponse<ConfigApp> response = new();

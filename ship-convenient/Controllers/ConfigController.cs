@@ -64,19 +64,12 @@ namespace ship_convenient.Controllers
             return SendResponse(result);
         }
 
-        [HttpPost("price-list")]
-        [ProducesResponseType(typeof(ApiResponse<List<ConfigPrice>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> CreateList([FromBody] List<CreateConfigPriceModel> model)
-        {
-            var result = await _configService.CreateList(model);
-            return SendResponse(result);
-        }
 
-        [HttpDelete("price-list")]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> DeleteList()
+        [HttpPost("price-reset")]
+        [ProducesResponseType(typeof(ApiResponse<List<ConfigPrice>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ResetList([FromBody] List<CreateConfigPriceModel> model)
         {
-            var result = await _configService.DeleteList();
+            var result = await _configService.ResetPrice(model);
             return SendResponse(result);
         }
     }
