@@ -11,6 +11,7 @@ using ship_convenient.Model.MapboxModel;
 using ship_convenient.Model.PackageModel;
 using ship_convenient.Services.AccountService;
 using ship_convenient.Services.GenericService;
+using ship_convenient.Services.GoongService;
 using ship_convenient.Services.MapboxService;
 using System.Linq.Expressions;
 using unitofwork_core.Constant.Package;
@@ -21,12 +22,14 @@ namespace ship_convenient.Services.PackageService
     public class PackageSuggestService : GenericService<PackageSuggestService>
     {
         private readonly IMapboxService _mapboxService;
+        private readonly IGoongService _goongService;
         private readonly AccountUtils _accountUtils;
         public PackageSuggestService(ILogger<PackageSuggestService> logger, IUnitOfWork unitOfWork,
-            IMapboxService mapboxService, AccountUtils accountUtils) : base(logger, unitOfWork)
+            IMapboxService mapboxService,IGoongService goongService, AccountUtils accountUtils) : base(logger, unitOfWork)
         {
             _mapboxService = mapboxService;
             _accountUtils = accountUtils;
+            _goongService = goongService;
         }
 
         public async Task<ApiResponse<List<ResponseSuggestPackageModel>>> SuggestCombo(Guid deliverId)
@@ -368,10 +371,10 @@ namespace ship_convenient.Services.PackageService
                 int packageCount = packages.Count;
 
                 _logger.LogInformation($"AccountId : {deliver.Id}" +
-                    $"== Số lượng gói hàng đã được duyệt: {packageCount}" +
-                    $"== Độ dài lộ trình gốc: {Math.Round(route.GetDistanceSuggest(suggestDirection: directionSuggest) / 1000,2)}km" +
-                    $"== Điểm đi: {route.FromName}\nĐiểm đến: {route.ToName}" +
-                    $"== Khoảng cách tối đa cho phép: {spacingValid / 1000}km");
+                    $"          Số lượng gói hàng đã được duyệt: {packageCount}" +
+                    $"          Độ dài lộ trình gốc: {Math.Round(route.GetDistanceSuggest(suggestDirection: directionSuggest) / 1000,2)}km" +
+                    $"          Điểm đi: {route.FromName}\nĐiểm đến: {route.ToName}" +
+                    $"          Khoảng cách tối đa cho phép: {spacingValid / 1000}km");
                 
                 for (int i = 0; i < packageCount; i++)
                 {
@@ -502,9 +505,9 @@ namespace ship_convenient.Services.PackageService
                 int packageCount = packages.Count;
 
                 _logger.LogInformation($"Số lượng gói hàng đã được duyệt: {packageCount}" +
-                    $"\nĐộ dài lộ trình gốc: {Math.Round(route.GetDistanceSuggest(suggestDirection: directionSuggest) / 1000, 2)}km" +
-                    $"\nĐiểm đi: {route.FromName}\nĐiểm đến: {route.ToName}" +
-                    $"\nKhoảng cách tối đa cho phép: {spacingValid / 1000}km");
+                    $"      Độ dài lộ trình gốc: {Math.Round(route.GetDistanceSuggest(suggestDirection: directionSuggest) / 1000, 2)}km" +
+                    $"      Điểm đi: {route.FromName}\nĐiểm đến: {route.ToName}" +
+                    $"      Khoảng cách tối đa cho phép: {spacingValid / 1000}km");
 
                 for (int i = 0; i < packageCount; i++)
                 {
@@ -525,6 +528,7 @@ namespace ship_convenient.Services.PackageService
                         allPackageWillOrder.Add(packages[i]);
                         List<GeoCoordinate> listPoints = SuggestPackageHelper.GetListPointOrder(directionSuggest, allPackageWillOrder, route);
                         DirectionApiModel requestModel = DirectionApiModel.FromListGeoCoordinate(listPoints);
+                        // List<ResponsePolyLineModel> listPolyline = await _mapboxService.GetPolyLine(requestModel);
                         List<ResponsePolyLineModel> listPolyline = await _mapboxService.GetPolyLine(requestModel);
                         _logger.LogInformation($"Độ dài lộ trình thực tế: {string.Format("{0:F2}", listPolyline[0].Distance / 1000)}km (Chênh lệch  {string.Format("{0:F2}", listPolyline[0].Distance / 1000 - distanceSuggest / 1000)}km)");
            

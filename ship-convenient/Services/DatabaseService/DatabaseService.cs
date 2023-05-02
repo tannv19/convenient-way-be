@@ -144,7 +144,7 @@ namespace ship_convenient.Services.DatabaseService
             tannvAcccount.UserName = "tannvv";
             tannvAcccount.Password = "123456";
             tannvAcccount.Role = RoleName.DELIVER;
-            tannvAcccount.Status = AccountStatus.ACTIVE;
+            tannvAcccount.Status = AccountStatus.NO_ROUTE;
             tannvAcccount.Balance = 500000;
             tannvAcccount.InfoUser = FakerInfoUser.Generate();
             tannvAcccount.InfoUser.FirstName = "Tân";
@@ -159,6 +159,8 @@ namespace ship_convenient.Services.DatabaseService
             transactionDatlt.AccountId = datlltAccount.Id;
             transactionDatlt.CoinExchange = 500000;
             transactionDatlt.TransactionType = TransactionType.INCREASE;
+            transactionDatlt.Title = "VNPAY";
+            transactionDatlt.Description = "Nạp tiền thành công từ ví VNPAY";
             transactionDatlt.Status = TransactionStatus.ACCOMPLISHED;
             transactionDatlt.BalanceWallet = 500000;
 
@@ -166,6 +168,8 @@ namespace ship_convenient.Services.DatabaseService
             transactionTan.AccountId = tannvAcccount.Id;
             transactionTan.CoinExchange = 500000;
             transactionTan.TransactionType = TransactionType.INCREASE;
+            transactionTan.Title = "VNPAY";
+            transactionTan.Description = "Nạp tiền thành công từ ví VNPAY";
             transactionTan.Status = TransactionStatus.ACCOMPLISHED;
             transactionTan.BalanceWallet = 500000;
 

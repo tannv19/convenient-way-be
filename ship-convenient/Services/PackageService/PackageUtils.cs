@@ -10,6 +10,7 @@ using ship_convenient.Model.MapboxModel;
 using ship_convenient.Services.AccountService;
 using ship_convenient.Services.FirebaseCloudMsgService;
 using ship_convenient.Services.GenericService;
+using ship_convenient.Services.GoongService;
 using ship_convenient.Services.MapboxService;
 using System.Linq.Expressions;
 using unitofwork_core.Constant.ConfigConstant;
@@ -25,13 +26,15 @@ namespace ship_convenient.Services.PackageService
         private readonly AccountUtils _accountUtils;
         protected readonly IFirebaseCloudMsgService _fcmService;
         private readonly IMapboxService _mapboxService;
+        private readonly IGoongService _goongService;
 
         public PackageUtils(ILogger<PackageService> logger, IUnitOfWork unitOfWork, AccountUtils accountUtils, IMapboxService mapboxService
-            , IFirebaseCloudMsgService fcmService) : base(logger, unitOfWork)
+            , IFirebaseCloudMsgService fcmService, IGoongService goongService) : base(logger, unitOfWork)
         {
             _accountUtils = accountUtils;
             _fcmService = fcmService;
             _mapboxService = mapboxService;
+            _goongService = goongService;
         }
 
         public bool IsValidComboBalance(int accountBalance, ResponseComboPackageModel combo)
@@ -228,6 +231,32 @@ namespace ship_convenient.Services.PackageService
             return routePoints;
         }
 
+        public async Task<List<RoutePoint>> GetRouteVirtualGoong(List<GeoCoordinate> orderPoints, Guid routeId)
+        {
+            List<ResponsePolyLineModel> polylines = await _goongService.GetPolyLine(DirectionApiModel.FromListGeoCoordinate(orderPoints));
+            List<RoutePoint> routePoints = new List<RoutePoint>();
+            List<CoordinateApp>? points = polylines[0].PolyPoints;
+            if (polylines[0].PolyPoints == null) new ArgumentNullException("polyline is null");
+            int count = points!.Count;
+            for (int i = 0; i < count; i++)
+            {
+                CoordinateApp point = points[i];
+                RoutePoint routePoint = new RoutePoint()
+                {
+                    RouteId = routeId,
+                    Index = i,
+                    Latitude = point.Latitude,
+                    Longitude = point.Longitude,
+                    DirectionType = "VIRTUAL",
+                    IsVitual = true
+                };
+                routePoints.Add(routePoint);
+            }
+
+
+            return routePoints;
+        }
+
         public async Task ReloadVirtualRoute(Guid deliverId)
         {
             RouteEntity activeRoute = await _accountUtils.GetActiveRoute(deliverId);
@@ -270,9 +299,12 @@ namespace ship_convenient.Services.PackageService
               else if (packagesNotComplete.Count == 0) {
                   return;
               }*/
+            // List<RoutePoint> virtualRoute = await GetRouteVirtual(geoCoordinates, activeRoute.Id);
             List<RoutePoint> virtualRoute = await GetRouteVirtual(geoCoordinates, activeRoute.Id);
             await _routePointRepo.InsertAsync(virtualRoute);
         }
+
+        
 
     }
 }
